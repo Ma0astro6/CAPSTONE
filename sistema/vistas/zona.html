@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zona</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="note" id="nota">Cada zona tiene compras (ítem, proveedor, neto, IVA, estado) e hitos para el Gantt. Si no hay filas, la zona está en catálogo pero aún sin obra abierta.</p>
+      <h2 id="titulo" style="margin-top:0"></h2>
+      <div class="panel" style="margin-bottom:14px">
+        <h3>Nueva línea de compra</h3>
+        <div class="form-grid">
+          <div><label>Ítem</label><input placeholder="Ej. pintura interior 4 L" /></div>
+          <div><label>Proveedor</label><input placeholder="Sodimac / ferretería" /></div>
+          <div><label>Cantidad</label><input value="1" /></div>
+          <div><label>Neto unitario</label><input placeholder="32990" /></div>
+          <div><label>IVA (19%)</label><input value="Automático en Fase 3" readonly /></div>
+          <div><label>Estado</label><input value="Cotizado" /></div>
+        </div>
+        <button class="btn" type="button" style="margin-top:12px">Agregar (no graba aún)</button>
+      </div>
+      <h3>Compras de esta zona</h3>
+      <table class="data" id="tabla-compras">
+        <thead>
+          <tr>
+            <th>Ítem</th>
+            <th>Proveedor</th>
+            <th>Estado</th>
+            <th>Neto</th>
+            <th>IVA 19%</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <h3 style="margin-top:22px">Hitos / Gantt de la zona</h3>
+      <table class="data" id="tabla-hitos">
+        <thead>
+          <tr>
+            <th>Hito</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p style="margin-top:12px"><a href="gantt.html">Ver carta Gantt global</a></p>
+    </main>
+  </div>
+  <script src="../js/datos.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    const id = qs("z") || "107";
+    const zona = (typeof ZONAS_RE !== "undefined" ? ZONAS_RE : []).find((z) => z.id === id);
+    const nombre = zona ? zona.nombre : "Zona " + id;
+    document.getElementById("titulo").textContent = nombre + (zona ? " · " + zona.tipo : "");
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:nombre, href:"zona.html?z="+id}]);
+    const compras = (COMPRAS_ZONA[id] || []);
+    const hitos = (HITOS_ZONA[id] || []);
+    const tbC = document.querySelector("#tabla-compras tbody");
+    if (!compras.length) {
+      tbC.innerHTML = "<tr><td colspan='6'>Sin compras cargadas. Esta zona existe en el catálogo (como carpeta vacía en Drive).</td></tr>";
+    } else {
+      tbC.innerHTML = compras.map((c) => {
+        const iva = Math.round(c.neto * 0.19);
+        return `<tr><td>${c.item}</td><td>${c.proveedor}</td><td>${c.estado}</td><td class="num">${clp(c.neto)}</td><td class="num">${clp(iva)}</td><td class="num money">${clp(c.neto+iva)}</td></tr>`;
+      }).join("");
+    }
+    const tbH = document.querySelector("#tabla-hitos tbody");
+    if (!hitos.length) {
+      tbH.innerHTML = "<tr><td colspan='4'>Sin hitos. Cuando parta la obra se agregan fechas y alimentan el Gantt.</td></tr>";
+    } else {
+      tbH.innerHTML = hitos.map((h) => `<tr><td>${h.hito}</td><td>${h.inicio}</td><td>${h.fin}</td><td>${h.estado}</td></tr>`).join("");
+    }
+  </script>
+</body>
+</html>

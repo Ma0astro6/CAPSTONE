@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Remodelaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="note">Un recuadro = una zona del predio (como las carpetas Excel). Dentro: líneas de compra, hitos y Gantt. No se mezclan marketing ni recepción.</p>
+      <div class="kpi">
+        <div class="box"><span>Hab. 107 (abierta)</span><b>$ 23.980</b></div>
+        <div class="box"><span>Hab. 201 (pintura)</span><b>$ 47.490</b></div>
+        <div class="box"><span>Mes (ejemplo)</span><b>$ 820 mil</b></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px">
+        <a class="tile t-pre sm" href="proveedores.html"><h3>Proveedores</h3><p>Sodimac, Easy, ferretería, maderas</p></a>
+        <a class="tile t-act sm" href="bodega-insumos.html"><h3>Bodega de insumos de obra</h3><p>Pintura, silicona, tapas, no sábanas</p></a>
+      </div>
+      <div class="filters">
+        <select id="filtro-tipo">
+          <option value="">Todos los tipos</option>
+          <option>Edificio</option>
+          <option>Cabaña</option>
+          <option>Habitación P1</option>
+          <option>Habitación P2</option>
+          <option>Habitación P3</option>
+        </select>
+        <input type="search" id="filtro-zona" placeholder="Buscar zona" />
+      </div>
+      <div class="mini-tiles" id="zonas"></div>
+    </main>
+  </div>
+  <script src="../js/datos.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"}]);
+    const host = document.getElementById("zonas");
+    const tipo = document.getElementById("filtro-tipo");
+    const q = document.getElementById("filtro-zona");
+    function pintar() {
+      const t = tipo.value;
+      const s = q.value.trim().toLowerCase();
+      host.innerHTML = ZONAS_RE.filter((z) => {
+        if (t && z.tipo !== t) return false;
+        if (s && !z.nombre.toLowerCase().includes(s) && !z.id.includes(s)) return false;
+        return true;
+      }).map((z) => `
+        <a class="mini t-rem" href="zona.html?z=${encodeURIComponent(z.id)}">
+          <div class="code">${(z.id.length <= 3 ? z.id : z.id.slice(0,3)).toUpperCase()}</div>
+          <b>${z.nombre}</b>
+          <small>${z.tipo}</small>
+        </a>`).join("");
+    }
+    tipo.addEventListener("change", pintar);
+    q.addEventListener("input", pintar);
+    pintar();
+  </script>
+</body>
+</html>

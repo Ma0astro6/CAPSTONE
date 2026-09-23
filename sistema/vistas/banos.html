@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Baños</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="note">Checklist por recinto: WC, lavamanos, ducha, silicona, extractores. Si se rompe algo, sale como reactiva y pide stock.</p>
+      <div class="filters">
+        <select><option>Todas las zonas</option><option>Piso 1</option><option>Piso 2</option><option>Piso 3</option><option>Áreas comunes</option><option>Cabañas</option></select>
+        <select><option>Todos los estados</option><option>OK</option><option>Observación</option><option>Reactiva abierta</option></select>
+        <button class="btn" type="button">Registrar ronda</button>
+      </div>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Recinto</th>
+            <th>Última ronda</th>
+            <th>WC</th>
+            <th>Lavamanos</th>
+            <th>Ducha</th>
+            <th>Silicona</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Habitación 107</td>
+            <td>23-09-2026</td>
+            <td>Tapa quebrada</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td><a href="reactivas.html"><span class="chip warn">Reactiva</span></a></td>
+          </tr>
+          <tr>
+            <td>Habitación 101</td>
+            <td>20-09-2026</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td>Reponer 2026-10</td>
+            <td><span class="chip">Observación</span></td>
+          </tr>
+          <tr>
+            <td>Habitación 205</td>
+            <td>18-09-2026</td>
+            <td>OK</td>
+            <td>Goteo leve</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td><span class="chip warn">Revisar</span></td>
+          </tr>
+          <tr>
+            <td>Baño recepción</td>
+            <td>22-09-2026</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td>—</td>
+            <td>OK</td>
+            <td><span class="chip ok">OK</span></td>
+          </tr>
+          <tr>
+            <td>Cabaña Sol</td>
+            <td>15-09-2026</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td>OK</td>
+            <td><span class="chip ok">OK</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Baños", href:"banos.html"}]);</script>
+</body>
+</html>

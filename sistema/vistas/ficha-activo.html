@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ficha de activo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <div class="split">
+        <div class="panel">
+          <h3>CA — Caldera</h3>
+          <div class="form-grid">
+            <div><label>Ubicación</label><input value="Sala de máquinas — hotel" readonly /></div>
+            <div><label>Ejecutor</label><input value="Externo" readonly /></div>
+            <div><label>Periodicidad</label><input value="Anual" readonly /></div>
+            <div><label>Próxima fecha</label><input value="2026-03-15" readonly /></div>
+            <div><label>Costo última mantención</label><input value="420000" readonly /></div>
+            <div><label>Garantía hasta</label><input value="2027-11-01" readonly /></div>
+            <div class="full"><label>Detalle</label><textarea rows="3" readonly>Revisión de quemador y limpieza de cámara.</textarea></div>
+            <div class="full"><label>Archivo de garantía</label><input value="garantia_caldera.pdf (estructura: se subirá en Fase 3)" readonly /></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Alertas de este activo</h3>
+          <div class="alert-card hoy"><p class="kicker">2 semanas antes</p><p>El 1 de marzo se dispara correo + aviso en el inicio.</p></div>
+          <div class="alert-card ok" style="margin-top:12px"><p class="kicker">Gantt</p><p>La periodicidad anual alimenta la carta Gantt.</p></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Máquinas", href:"maquinas.html"},{label:"Caldera", href:"ficha-activo.html"}]);</script>
+</body>
+</html>

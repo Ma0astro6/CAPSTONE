@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bodega de insumos de obra</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="note">Stock para remodelar y para reactivas (tapas, silicona, pintura). No entra ropa de cama ni amenities: eso queda fuera del sistema.</p>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Insumo</th>
+            <th>Uso</th>
+            <th>Stock</th>
+            <th>Mínimo</th>
+            <th>Ubicación física</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tapas WC</td>
+            <td>Reactiva baños</td>
+            <td>2</td>
+            <td>2</td>
+            <td>Bodega técnica</td>
+            <td><span class="chip">En mínimo</span></td>
+          </tr>
+          <tr>
+            <td>Silicona sanitaria</td>
+            <td>Baños / remodelación</td>
+            <td>0</td>
+            <td>3</td>
+            <td>Bodega técnica</td>
+            <td><span class="chip warn">Comprar</span></td>
+          </tr>
+          <tr>
+            <td>Pintura interior 4 L (blanco)</td>
+            <td>Habitaciones</td>
+            <td>4</td>
+            <td>2</td>
+            <td>Bodega técnica</td>
+            <td><span class="chip ok">OK</span></td>
+          </tr>
+          <tr>
+            <td>Flexibles de agua</td>
+            <td>Reactiva</td>
+            <td>8</td>
+            <td>4</td>
+            <td>Bodega técnica</td>
+            <td><span class="chip ok">OK</span></td>
+          </tr>
+          <tr>
+            <td>Pilas AAA</td>
+            <td>Controles TV</td>
+            <td>12</td>
+            <td>8</td>
+            <td>Bodega técnica</td>
+            <td><span class="chip ok">OK</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px"><a href="reactivas.html">Ir a reactivas (descuenta stock)</a></p>
+    </main>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Bodega insumos", href:"bodega-insumos.html"}]);</script>
+</body>
+</html>

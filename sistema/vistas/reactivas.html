@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reactivas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <div class="split">
+        <div class="panel">
+          <h3>Nueva emergencia</h3>
+          <div class="form-grid">
+            <div><label>Qué se rompió</label><input value="Tapa de baño" /></div>
+            <div><label>Zona</label><input value="Habitación 107" /></div>
+            <div><label>¿Hay stock?</label><input value="Sí — 2 tapas en bodega" readonly /></div>
+            <div><label>Quién la realiza</label><input value="Maestro Luis" /></div>
+            <div><label>Fecha</label><input type="date" value="2026-09-22" /></div>
+            <div><label>Costo</label><input value="18000" /></div>
+          </div>
+          <p class="banner" style="margin-top:14px">El botón no graba: es el formulario del módulo. En Fase 3 descuenta 1 tapa del stock.</p>
+          <button class="btn btn-warn" type="button">Registrar y descontar 1 tapa</button>
+        </div>
+        <div class="panel">
+          <h3>Stock anclado</h3>
+          <div class="mini-tiles">
+            <div class="mini t-man"><div class="code">TP</div><b>Tapas baño</b><small>2 unidades</small></div>
+            <div class="mini t-obr"><div class="code">FX</div><b>Flexibles</b><small>8 unidades</small></div>
+            <div class="mini t-mej"><div class="code">SF</div><b>Sifones</b><small>5 unidades</small></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Reactivas", href:"reactivas.html"}]);</script>
+</body>
+</html>

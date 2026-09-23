@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proveedores</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="note">Agenda de compra para remodelación y reactivas. No es el listado de proveedores de cocina ni de recepción.</p>
+      <div class="filters">
+        <input type="search" placeholder="Nombre o rubro" />
+        <button class="btn" type="button">Nuevo proveedor</button>
+      </div>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Proveedor</th>
+            <th>Rubro</th>
+            <th>Contacto</th>
+            <th>Lo que se compra</th>
+            <th>Plazo típico</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sodimac</td>
+            <td>Retail construcción</td>
+            <td>Sucursal más cercana</td>
+            <td>Tapas WC, silicona, herramientas</td>
+            <td>Mismo día</td>
+          </tr>
+          <tr>
+            <td>Easy</td>
+            <td>Retail construcción</td>
+            <td>—</td>
+            <td>Pintura, luminarias</td>
+            <td>Mismo día</td>
+          </tr>
+          <tr>
+            <td>Ceresita</td>
+            <td>Pinturas</td>
+            <td>Vendedor zona</td>
+            <td>Pintura interior / exterior</td>
+            <td>2–4 días</td>
+          </tr>
+          <tr>
+            <td>Maderas del Sur</td>
+            <td>Maderas</td>
+            <td>—</td>
+            <td>Guardapolvos, piso, molduras</td>
+            <td>1 semana</td>
+          </tr>
+          <tr>
+            <td>Ferretería local</td>
+            <td>Ferretería</td>
+            <td>Mostrador</td>
+            <td>Tornillos, chapas, flexibles</td>
+            <td>Mismo día</td>
+          </tr>
+          <tr>
+            <td>Técnico caldera autorizado</td>
+            <td>Servicio</td>
+            <td>Agenda anual</td>
+            <td>Mantención caldera</td>
+            <td>Según visita</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Proveedores", href:"proveedores.html"}]);</script>
+</body>
+</html>

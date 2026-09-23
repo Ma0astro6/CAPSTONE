@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mejoras</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="note">Tres capas como los Excel de “Mejoras / proyectos futuros”: ideas por hacer, plan anual (obras y jardín) y proyectos ya valorizados para jefes.</p>
+      <div class="kpi">
+        <div class="box"><span>Carpeta valorizada</span><b>$ 4.2M</b></div>
+        <div class="box"><span>Plan anual obras 2026</span><b>$ 1.5M</b></div>
+        <div class="box"><span>Ideas sin valorizar</span><b>6</b></div>
+      </div>
+
+      <h3 style="margin:18px 0 8px">Por hacer (ideas)</h3>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Idea</th>
+            <th>Área</th>
+            <th>Quién la propone</th>
+            <th>Estado</th>
+            <th>Pasa a</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Zona parrilla eventos</td>
+            <td>Obras</td>
+            <td>Equipo</td>
+            <td><span class="chip">Idea</span></td>
+            <td>Valorizar</td>
+          </tr>
+          <tr>
+            <td>Línea de árboles acceso</td>
+            <td>Jardín</td>
+            <td>Andrés</td>
+            <td><span class="chip">Idea</span></td>
+            <td>Plan anual jardín</td>
+          </tr>
+          <tr>
+            <td>Iluminación sendero cabañas</td>
+            <td>Obras</td>
+            <td>Equipo</td>
+            <td><span class="chip">En estudio</span></td>
+            <td>Cotizar</td>
+          </tr>
+          <tr>
+            <td>Techumbre bodega jardín</td>
+            <td>Obras</td>
+            <td>Mantención</td>
+            <td><span class="chip warn">Urgente (humedad)</span></td>
+            <td>Remodelación / compra</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:22px 0 8px">Plan anual 2026 — obras</h3>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Mes</th>
+            <th>Costo est.</th>
+            <th>Estado</th>
+            <th>Gantt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pintar reja de acceso</td>
+            <td>Septiembre</td>
+            <td class="num">$ 180.000</td>
+            <td><span class="chip warn">En 5 días</span></td>
+            <td><a href="gantt.html">Ver</a></td>
+          </tr>
+          <tr>
+            <td>Mantención techos hotel</td>
+            <td>Marzo / octubre</td>
+            <td class="num">$ 420.000</td>
+            <td>Programada oct.</td>
+            <td><a href="gantt.html">Ver</a></td>
+          </tr>
+          <tr>
+            <td>Sellado ventanas piso 2</td>
+            <td>Abril</td>
+            <td class="num">$ 260.000</td>
+            <td><span class="chip ok">Hecho</span></td>
+            <td><a href="gantt.html">Ver</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:22px 0 8px">Plan anual 2026 — jardín</h3>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Temporada</th>
+            <th>Costo est.</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Poda de altura predio</td>
+            <td>Invierno</td>
+            <td class="num">$ 350.000</td>
+            <td><span class="chip ok">Hecho jul-2026</span></td>
+          </tr>
+          <tr>
+            <td>Reposición plantas acceso</td>
+            <td>Primavera</td>
+            <td class="num">$ 220.000</td>
+            <td>Por ejecutar</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:22px 0 8px">Proyectos valorizados (carpeta jefes)</h3>
+      <div class="mini-tiles">
+        <div class="mini t-mej"><div class="code">PE</div><b>Pérgola jardín</b><small>$1.500.000 · materiales + mano de obra</small><span class="badge">CARPETA</span></div>
+        <div class="mini t-jar"><div class="code">PA</div><b>Zona parrilla</b><small>$900.000 · aún idea con cifra gruesa</small><span class="badge">FUTURO</span></div>
+        <div class="mini t-man"><div class="code">AR</div><b>Línea de árboles</b><small>$800.000 · entrada eventos</small><span class="badge">FUTURO</span></div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mejoras", href:"mejoras.html"}]);</script>
+</body>
+</html>

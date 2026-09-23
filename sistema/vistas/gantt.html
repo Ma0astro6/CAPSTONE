@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carta Gantt</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="note">Mezcla de avisos MG (frecuencia), plan anual ME y hitos RE. No incluye Gantt de marketing ni de recepción.</p>
+      <div class="panel">
+        <h3>2026 — obras, jardín y máquinas</h3>
+        <div class="gantt-row"><b>Caldera (MG)</b><div class="gantt-bar"><i style="left:18%;width:8%"></i></div></div>
+        <div class="gantt-row"><b>Agua potable (MG)</b><div class="gantt-bar"><i style="left:0;width:100%;background:#3a7d4c;opacity:.45"></i></div></div>
+        <div class="gantt-row"><b>Poda altura (ME)</b><div class="gantt-bar"><i style="left:52%;width:8%;background:#3a7d4c"></i></div></div>
+        <div class="gantt-row"><b>Reja acceso (ME)</b><div class="gantt-bar"><i style="left:68%;width:10%;background:#c4783a"></i></div></div>
+        <div class="gantt-row"><b>Hab. 107 (RE)</b><div class="gantt-bar"><i style="left:70%;width:6%;background:#c4783a"></i></div></div>
+        <div class="gantt-row"><b>Hab. 201 (RE)</b><div class="gantt-bar"><i style="left:74%;width:12%;background:#c4783a"></i></div></div>
+        <p style="margin-top:12px;color:var(--muted)">Estructura visual. En Fase 3 las barras salen de las fechas de cada catálogo y de cada zona.</p>
+      </div>
+    </main>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Carta Gantt", href:"gantt.html"}]);</script>
+</body>
+</html>
