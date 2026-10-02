@@ -4,66 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bodegas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
-  <div id="shell">
-    <main class="main">
-      <p class="note">No es inventario de hotel (sábanas, amenities). Es el recinto: humedad, orden, pestes, luminarias y fecha de revisión. El stock de insumos de obra va en Remodelación.</p>
-      <div class="filters">
-        <select><option>Todas las bodegas</option><option>Bodega técnica</option><option>Bodega jardín</option><option>Bodega eventos</option><option>Bodega casa</option></select>
-        <button class="btn" type="button">Nueva revisión</button>
-      </div>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Bodega</th>
-            <th>Ubicación</th>
-            <th>Última revisión</th>
-            <th>Próxima</th>
-            <th>Estado recinto</th>
-            <th>Hallazgos</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Bodega técnica / máquinas</td>
-            <td>Hotel, subterráneo</td>
-            <td>02-09-2026</td>
-            <td>02-10-2026</td>
-            <td><span class="chip ok">OK</span></td>
-            <td>Ordenar mangueras</td>
-          </tr>
-          <tr>
-            <td>Bodega jardín</td>
-            <td>Exterior, lado piscina</td>
-            <td>10-09-2026</td>
-            <td>10-10-2026</td>
-            <td><span class="chip warn">Humedad</span></td>
-            <td>Goteo en techo chapa</td>
-          </tr>
-          <tr>
-            <td>Bodega centro de eventos</td>
-            <td>Eventos</td>
-            <td>28-08-2026</td>
-            <td>28-09-2026</td>
-            <td><span class="chip ok">OK</span></td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td>Bodega casa / parcela</td>
-            <td>Casa</td>
-            <td>15-08-2026</td>
-            <td>15-09-2026</td>
-            <td><span class="chip">Vencida</span></td>
-            <td>Revisar pestes</td>
-          </tr>
-        </tbody>
-      </table>
-    </main>
-  </div>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
   <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Bodegas", href:"bodegas.html"}]);</script>
+  <script src="../js/catalogo.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Bodegas", href:"bodegas.html"}], { agenda: false });
+    catalogo({
+      title: "Revisión de bodegas",
+      extra: tabsPredio("bodegas.html"),
+      note: "Recorrido de recintos, no inventario hotelero. Registrar visita no edita la ficha.",
+      rows: MG.bodegas,
+      filterKey: "ubicacion",
+      filterAll: "Todas las ubicaciones",
+      searchPlaceholder: "Buscar código o bodega",
+      searchKeys: ["cod", "nombre", "ubicacion", "quien"],
+      pickLabel: (r) => (r.cod ? r.cod + " · " : "") + r.nombre,
+      nameKey: "nombre",
+      editKeys: ["cod", "nombre", "ubicacion"],
+      cols: [
+        { key: "cod", label: "Código" },
+        { key: "nombre", label: "Bodega" },
+        { key: "ubicacion", label: "Ubicación" },
+        { key: "ultima", label: "Última revisión", chip: true, warnEmpty: true },
+        { key: "quien", label: "Quién" }
+      ]
+    });
+  </script>
 </body>
 </html>

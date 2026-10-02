@@ -4,97 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fosas y agua</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
-  <div id="shell">
-    <main class="main">
-      <p class="note">Planilla tipo “Fosas”: cada punto del predio con última succión / tratamiento y quién lo hace (interno o camión).</p>
-      <div class="filters">
-        <select><option>Todos los recintos</option><option>Hotel</option><option>Cabañas</option><option>Centro de eventos</option><option>Casa / parcela</option></select>
-        <select><option>Todos los servicios</option><option>Fosa séptica</option><option>Tratamiento agua potable</option><option>Pozo</option></select>
-        <button class="btn" type="button">Registrar visita</button>
-      </div>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Punto</th>
-            <th>Tipo</th>
-            <th>Ubicación</th>
-            <th>Frecuencia</th>
-            <th>Última visita</th>
-            <th>Próxima</th>
-            <th>Quién</th>
-            <th>Obs.</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Fosa hotel principal</td>
-            <td>Fosa séptica</td>
-            <td>Hotel</td>
-            <td>Anual (camión)</td>
-            <td>04-02-2026</td>
-            <td>04-02-2027</td>
-            <td>Externo</td>
-            <td>Sin olor</td>
-          </tr>
-          <tr>
-            <td>Fosa cabaña Sol</td>
-            <td>Fosa séptica</td>
-            <td>Cabaña Sol</td>
-            <td>Anual</td>
-            <td>18-03-2026</td>
-            <td>18-03-2027</td>
-            <td>Externo</td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td>Fosa cabaña Luna</td>
-            <td>Fosa séptica</td>
-            <td>Cabaña Luna</td>
-            <td>Anual</td>
-            <td>18-03-2026</td>
-            <td>18-03-2027</td>
-            <td>Externo</td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td>Fosa centro de eventos</td>
-            <td>Fosa séptica</td>
-            <td>Centro de eventos</td>
-            <td>Según ocupación</td>
-            <td>22-08-2026</td>
-            <td><span class="chip">Revisar post-evento</span></td>
-            <td>Externo / interno</td>
-            <td>Evento 80 pax</td>
-          </tr>
-          <tr>
-            <td>Tratamiento agua potable</td>
-            <td>Cloro / filtro</td>
-            <td>Pozo / estanque</td>
-            <td>Semanal interno</td>
-            <td>20-09-2026</td>
-            <td><span class="chip warn">23-09-2026</span></td>
-            <td>Interno</td>
-            <td>Medir cloro residual</td>
-          </tr>
-          <tr>
-            <td>Pozo profundo</td>
-            <td>Pozo</td>
-            <td>Parcela</td>
-            <td>Inspección mensual</td>
-            <td>01-09-2026</td>
-            <td>01-10-2026</td>
-            <td>Interno</td>
-            <td>Nivel OK</td>
-          </tr>
-        </tbody>
-      </table>
-    </main>
-  </div>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
   <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Fosas y agua", href:"fosas.html"}]);</script>
+  <script src="../js/catalogo.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Fosas y agua", href:"fosas.html"}], { agenda: false });
+    catalogo({
+      title: "Fosas, graseras y planta",
+      extra: tabsPredio("fosas.html") + '<div class="contactos">' + MG.fosas_contactos.map((c) => `<span><b>${c.quien}</b> · ${c.dato}</span>`).join("") + "</div>",
+      note: "Visita nueva a la derecha. Modificar abre ventana. Ver detalle muestra succiones anteriores.",
+      rows: MG.fosas,
+      filterKey: "tipo",
+      filterAll: "Todos los tipos",
+      searchPlaceholder: "Buscar fosa, grasera o planta",
+      searchKeys: ["punto", "ubicacion", "tipo"],
+      pickLabel: (r) => r.punto,
+      nameKey: "punto",
+      editKeys: ["punto", "tipo", "ubicacion"],
+      cols: [
+        { key: "punto", label: "Punto" },
+        { key: "tipo", label: "Tipo" },
+        { key: "ubicacion", label: "Ubicación" },
+        { key: "ultima", label: "Última succión", chip: true, warnEmpty: true }
+      ]
+    });
+  </script>
 </body>
 </html>

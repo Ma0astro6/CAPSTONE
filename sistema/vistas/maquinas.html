@@ -4,109 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Máquinas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
-  <div id="shell">
-    <main class="main">
-      <p class="note">Catálogo + historial de fechas. Cada fila es un equipo; el aviso sale de la última mantención + frecuencia.</p>
-      <div class="filters">
-        <input type="search" placeholder="Buscar equipo o zona" />
-        <select><option>Todas las zonas</option><option>Hotel</option><option>Cocina</option><option>Piscina</option><option>Pozo</option></select>
-        <select><option>Todas las frecuencias</option><option>Semanal</option><option>Mensual</option><option>Semestral</option><option>Anual</option></select>
-        <button class="btn" type="button">Nueva máquina</button>
-      </div>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Equipo</th>
-            <th>Ubicación</th>
-            <th>Frecuencia</th>
-            <th>Última</th>
-            <th>Próxima</th>
-            <th>Responsable</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Caldera hotel</td>
-            <td>Sala de calderas</td>
-            <td>Semestral (externo)</td>
-            <td>12-03-2026</td>
-            <td><span class="chip warn">12-09-2026</span></td>
-            <td>Técnico autorizado</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-          <tr>
-            <td>Bomba de calor piscina</td>
-            <td>Casa de máquinas piscina</td>
-            <td>Mensual</td>
-            <td>01-09-2026</td>
-            <td>01-10-2026</td>
-            <td>Interno</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-          <tr>
-            <td>Bombas de filtro piscina (2)</td>
-            <td>Piscina</td>
-            <td>Semanal</td>
-            <td>16-09-2026</td>
-            <td>23-09-2026</td>
-            <td>Interno</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-          <tr>
-            <td>Bomba de agua potable</td>
-            <td>Pozo / estanque</td>
-            <td>Mensual</td>
-            <td>05-09-2026</td>
-            <td>05-10-2026</td>
-            <td>Interno</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-          <tr>
-            <td>Compresor</td>
-            <td>Bodega técnica</td>
-            <td>Trimestral</td>
-            <td>20-07-2026</td>
-            <td>20-10-2026</td>
-            <td>Interno</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-          <tr>
-            <td>Máquina de hielo</td>
-            <td>Cocina</td>
-            <td>Mensual</td>
-            <td>10-09-2026</td>
-            <td>10-10-2026</td>
-            <td>Interno / técnico</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-          <tr>
-            <td>Extractor campana cocina</td>
-            <td>Cocina</td>
-            <td>Mensual (limpieza)</td>
-            <td>08-09-2026</td>
-            <td>08-10-2026</td>
-            <td>Interno</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-          <tr>
-            <td>Generador de emergencia</td>
-            <td>Exterior hotel</td>
-            <td>Mensual (prueba)</td>
-            <td>15-09-2026</td>
-            <td>15-10-2026</td>
-            <td>Interno</td>
-            <td><a href="ficha-activo.html">Ficha</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </main>
-  </div>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
   <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Máquinas", href:"maquinas.html"}]);</script>
+  <script src="../js/catalogo.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Máquinas", href:"maquinas.html"}], { agenda: false });
+    catalogo({
+      title: "Máquinas",
+      extra: tabsEquipos("maquinas.html"),
+      note: "Registrar visita agrega una línea nueva. Modificar abre una ventana para corregir la ficha. Ver detalle muestra el historial.",
+      rows: MG.maquinas,
+      filterKey: "ubicacion",
+      filterAll: "Todas las ubicaciones",
+      searchPlaceholder: "Buscar equipo, zona o proveedor",
+      searchKeys: ["equipo", "ubicacion", "proveedor", "quien", "detalle"],
+      pickLabel: (r) => r.equipo,
+      nameKey: "equipo",
+      editKeys: ["equipo", "ubicacion", "proveedor"],
+      cols: [
+        { key: "equipo", label: "Equipo" },
+        { key: "ubicacion", label: "Ubicación" },
+        { key: "proveedor", label: "Proveedor" },
+        { key: "ultima", label: "Última", chip: true, warnEmpty: true },
+        { key: "quien", label: "Quién" },
+        { key: "detalle", label: "Detalle" }
+      ]
+    });
+  </script>
 </body>
 </html>

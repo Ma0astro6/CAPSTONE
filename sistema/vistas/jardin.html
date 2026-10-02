@@ -4,95 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Jardinería</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
-  <div id="shell">
-    <main class="main">
-      <p class="note">Sectores del predio + temporada (poda, riego, césped). Los insumos (tierra, plantas) se compran desde Remodelación / presupuesto, no desde aquí.</p>
-      <div class="tabs">
-        <span class="on">Primavera</span>
-        <span>Verano</span>
-        <span>Otoño</span>
-        <span>Invierno</span>
-      </div>
-      <div class="filters">
-        <select><option>Todos los sectores</option><option>Acceso / reja</option><option>Piscina</option><option>Cabañas</option><option>Estacionamiento</option><option>Huerta</option></select>
-        <button class="btn" type="button">Nueva faena</button>
-      </div>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Sector</th>
-            <th>Faena</th>
-            <th>Temporada</th>
-            <th>Frecuencia</th>
-            <th>Última</th>
-            <th>Próxima</th>
-            <th>Quién</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Acceso / reja</td>
-            <td>Poda setos y desmalezar</td>
-            <td>Primavera</td>
-            <td>Quincenal</td>
-            <td>12-09-2026</td>
-            <td>26-09-2026</td>
-            <td>Jardín interno</td>
-          </tr>
-          <tr>
-            <td>Piscina / solárium</td>
-            <td>Césped y borde</td>
-            <td>Primavera–verano</td>
-            <td>Semanal</td>
-            <td>20-09-2026</td>
-            <td>27-09-2026</td>
-            <td>Jardín interno</td>
-          </tr>
-          <tr>
-            <td>Cabañas Sol y Luna</td>
-            <td>Riego y desmalezar</td>
-            <td>Primavera</td>
-            <td>Semanal</td>
-            <td>19-09-2026</td>
-            <td>26-09-2026</td>
-            <td>Jardín interno</td>
-          </tr>
-          <tr>
-            <td>Estacionamiento</td>
-            <td>Hojas y maleza</td>
-            <td>Otoño / primavera</td>
-            <td>Semanal</td>
-            <td>18-09-2026</td>
-            <td>25-09-2026</td>
-            <td>Jardín interno</td>
-          </tr>
-          <tr>
-            <td>Huerta / compost</td>
-            <td>Turno de riego</td>
-            <td>Todo el año</td>
-            <td>3 veces/semana</td>
-            <td>22-09-2026</td>
-            <td>23-09-2026</td>
-            <td>Jardín interno</td>
-          </tr>
-          <tr>
-            <td>Árboles predio</td>
-            <td>Poda de altura</td>
-            <td>Invierno</td>
-            <td>Anual</td>
-            <td>15-07-2026</td>
-            <td>15-07-2027</td>
-            <td>Externo</td>
-          </tr>
-        </tbody>
-      </table>
-    </main>
-  </div>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
   <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Jardinería", href:"jardin.html"}]);</script>
+  <script src="../js/catalogo.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Jardinería", href:"jardin.html"}], { agenda: false });
+    const riego = '<div class="riego-grid">' + MG.riego.map((x) => `<div><b>${x.dia}</b>${x.zona}</div>`).join("") + "</div>";
+    const lab = '<p class="note">' + MG.labores.map((x) => `<b>${x.sector}:</b> ${x.faena}`).join(" · ") + "</p>";
+    catalogo({
+      title: "Jardinería",
+      extra: tabsPredio("jardin.html") + riego + lab,
+      note: "Faena = fila. Visita nueva a la derecha. Modificar corrige sector o texto. Ver detalle es el historial.",
+      rows: MG.jardin,
+      filterKey: "sector",
+      filterAll: "Todos los sectores",
+      searchPlaceholder: "Buscar faena o sector",
+      searchKeys: ["faena", "sector", "temporada", "prioridad"],
+      pickLabel: (r) => r.faena,
+      nameKey: "faena",
+      editKeys: ["sector", "prioridad", "faena", "temporada"],
+      cols: [
+        { key: "sector", label: "Sector" },
+        { key: "prioridad", label: "Prioridad" },
+        { key: "faena", label: "Faena" },
+        { key: "temporada", label: "Temporada" },
+        { key: "ultima", label: "Última", chip: true, warnEmpty: true }
+      ]
+    });
+  </script>
 </body>
 </html>

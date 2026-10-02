@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pilas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/catalogo.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Pilas", href:"pilas.html"}], { agenda: false });
+    catalogo({
+      title: "Pilas de TV y deco",
+      extra: tabsHab("pilas.html"),
+      note: "Recambio = visita nueva (el recuadro queda vacío). Modificar solo cambia zona o tipo de pila.",
+      rows: MG.pilas,
+      searchPlaceholder: "Buscar habitación o cabaña",
+      searchKeys: ["zona", "tv", "deco"],
+      pickLabel: (r) => r.zona,
+      nameKey: "zona",
+      dateKey: "fecha_tv",
+      editKeys: ["zona", "tv", "deco"],
+      cols: [
+        { key: "zona", label: "Zona" },
+        { key: "tv", label: "Pila TV" },
+        { key: "fecha_tv", label: "Fecha TV", chip: true, warnEmpty: true },
+        { key: "deco", label: "Pila deco" },
+        { key: "fecha_deco", label: "Fecha deco", chip: true, warnEmpty: true }
+      ]
+    });
+  </script>
+</body>
+</html>

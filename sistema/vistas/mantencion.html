@@ -4,30 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mantención general</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="note">Un recuadro = un catálogo que hoy vive en Excel (ubicación + última fecha + próximo aviso). Las reactivas son el mismo módulo, con urgencia.</p>
+      <p class="page-kicker">Listas de Andrés</p>
+      <h2 class="page-title">Mantención general</h2>
+      <p class="note">Cada recuadro es una planilla. Entras, buscas y registras la visita. Las reactivas son el mismo módulo, con urgencia.</p>
+
+      <p class="group-label">Equipos · las 3 hojas de LISTA DE MANTENCIONES</p>
       <div class="subgrid">
-        <a class="tile t-man sm" href="maquinas.html"><h3>Máquinas</h3><p>Caldera, bombas, hielo, extractores</p></a>
-        <a class="tile t-man sm" href="fosas.html"><h3>Fosas y agua</h3><p>Fosas, pozo, tratamiento</p></a>
-        <a class="tile t-man sm" href="bodegas.html"><h3>Bodegas</h3><p>Revisión de recintos, no inventario hotelero</p></a>
-        <a class="tile t-man sm" href="jardin.html"><h3>Jardinería</h3><p>Sectores y temporada</p></a>
-        <a class="tile t-man sm" href="banos.html"><h3>Baños</h3><p>Por habitación y área común</p></a>
-        <a class="tile t-man sm" href="tvs.html"><h3>TVs y pilas</h3><p>Control remoto y recambio</p></a>
-        <a class="tile t-man sm" href="puertas.html"><h3>Puertas y chapas</h3><p>Cierres, chapas, topes</p></a>
-        <a class="tile t-man sm" href="radiadores.html"><h3>Radiadores / frío</h3><p>Calefacción y refrigeradores</p></a>
+        <a class="tile t-man sm" href="maquinas.html"><h3>Máquinas</h3><p id="n-maq">Hoja Máquinas</p></a>
+        <a class="tile t-man sm" href="radiadores.html"><h3>Radiadores</h3><p id="n-rad">Hoja Radiadores</p></a>
+        <a class="tile t-man sm" href="refrigeradores.html"><h3>Refrigeradores</h3><p id="n-ref">Hoja Refrigerador</p></a>
       </div>
+
+      <p class="group-label">Predio</p>
+      <div class="subgrid">
+        <a class="tile t-man sm" href="fosas.html"><h3>Fosas y agua</h3><p id="n-fos">Fosas, graseras, planta</p></a>
+        <a class="tile t-man sm" href="bodegas.html"><h3>Bodegas</h3><p id="n-bod">Revisión de recintos</p></a>
+        <a class="tile t-man sm" href="jardin.html"><h3>Jardinería</h3><p id="n-jar">4 sectores y riego</p></a>
+      </div>
+
+      <p class="group-label">Habitaciones y recintos</p>
+      <div class="subgrid">
+        <a class="tile t-man sm" href="banos.html"><h3>Baños</h3><p id="n-ban">Por habitación</p></a>
+        <a class="tile t-man sm" href="tvs.html"><h3>Televisores</h3><p id="n-tv">Marca y pulgadas</p></a>
+        <a class="tile t-man sm" href="pilas.html"><h3>Pilas</h3><p id="n-pil">TV y decodificador</p></a>
+        <a class="tile t-man sm" href="puertas.html"><h3>Puertas</h3><p id="n-pue">Engrase y aceite</p></a>
+      </div>
+
+      <p class="group-label">Urgencias y prevención</p>
       <div class="grid-2">
-        <a class="tile t-rea" href="reactivas.html"><h3>Reactivas / emergencias</h3><p>Aviso de recepción o huésped — stock de repuesto</p></a>
-        <a class="tile t-dark" href="gantt.html"><h3>Calendario MG</h3><p>Avisos semanales, mensuales y anuales</p></a>
+        <a class="tile t-rea" href="reactivas.html"><h3>Reactivas</h3><p>Aviso de recepción o huésped</p></a>
+        <a class="tile t-dark" href="prevencion.html"><h3>Prevención</h3><p>Gantt de Esteban Ortiz (OSH)</p></a>
       </div>
     </main>
   </div>
+  <script src="../js/datos-mg.js"></script>
   <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención general", href:"mantencion.html"}]);</script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención general", href:"mantencion.html"}], { agenda: false });
+    const set = (id, n, label) => { const el = document.getElementById(id); if (el) el.textContent = n + " " + label; };
+    set("n-maq", MG.maquinas.length, "equipos");
+    set("n-rad", MG.radiadores.length, "puntos");
+    set("n-ref", MG.refrigeradores.length, "equipos");
+    set("n-fos", MG.fosas.length, "puntos");
+    set("n-bod", MG.bodegas.length, "recintos");
+    set("n-jar", MG.jardin.length, "faenas");
+    set("n-ban", MG.banos.length, "recintos");
+    set("n-tv", MG.tvs.length, "TVs");
+    set("n-pil", MG.pilas.length, "zonas");
+    set("n-pue", MG.puertas.length, "puertas");
+  </script>
 </body>
 </html>

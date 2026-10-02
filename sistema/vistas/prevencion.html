@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prevención</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/catalogo.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Prevención", href:"prevencion.html"}], { agenda: false });
+    catalogo({
+      title: "Prevención de riesgos",
+      extra: tabsUrg("prevencion.html"),
+      note: "Modificar cambia tarea, fechas o estado. Registrar visita es un avance, no pisa la ficha.",
+      rows: MG.prevencion,
+      filterKey: "estado",
+      filterAll: "Todos los estados",
+      searchPlaceholder: "Buscar tarea",
+      searchKeys: ["id", "tarea", "quien", "estado"],
+      pickLabel: (r) => r.id + " · " + r.tarea,
+      nameKey: "tarea",
+      editKeys: ["id", "tarea", "quien", "inicio", "fin", "estado"],
+      cols: [
+        { key: "id", label: "Ítem" },
+        { key: "tarea", label: "Tarea" },
+        { key: "quien", label: "Quién" },
+        { key: "inicio", label: "Inicio" },
+        { key: "fin", label: "Fin" },
+        { key: "estado", label: "Estado" },
+        { key: "ultima", label: "Último avance", chip: true, warnEmpty: true }
+      ]
+    });
+  </script>
+</body>
+</html>

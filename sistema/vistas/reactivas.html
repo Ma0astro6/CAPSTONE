@@ -4,38 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Reactivas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
-  <div id="shell">
-    <main class="main">
-      <div class="split">
-        <div class="panel">
-          <h3>Nueva emergencia</h3>
-          <div class="form-grid">
-            <div><label>Qué se rompió</label><input value="Tapa de baño" /></div>
-            <div><label>Zona</label><input value="Habitación 107" /></div>
-            <div><label>¿Hay stock?</label><input value="Sí — 2 tapas en bodega" readonly /></div>
-            <div><label>Quién la realiza</label><input value="Maestro Luis" /></div>
-            <div><label>Fecha</label><input type="date" value="2026-09-22" /></div>
-            <div><label>Costo</label><input value="18000" /></div>
-          </div>
-          <p class="banner" style="margin-top:14px">El botón no graba: es el formulario del módulo. En Fase 3 descuenta 1 tapa del stock.</p>
-          <button class="btn btn-warn" type="button">Registrar y descontar 1 tapa</button>
-        </div>
-        <div class="panel">
-          <h3>Stock anclado</h3>
-          <div class="mini-tiles">
-            <div class="mini t-man"><div class="code">TP</div><b>Tapas baño</b><small>2 unidades</small></div>
-            <div class="mini t-obr"><div class="code">FX</div><b>Flexibles</b><small>8 unidades</small></div>
-            <div class="mini t-mej"><div class="code">SF</div><b>Sifones</b><small>5 unidades</small></div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
   <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Reactivas", href:"reactivas.html"}]);</script>
+  <script src="../js/catalogo.js"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Reactivas", href:"reactivas.html"}], { agenda: false });
+    const stock = `<div class="mini-tiles" style="justify-content:center;margin-bottom:14px">
+      <div class="mini t-man"><div class="code">TP</div><b>Tapas baño</b><small>2 unidades</small></div>
+      <div class="mini t-obr"><div class="code">FX</div><b>Flexibles</b><small>8 unidades</small></div>
+      <div class="mini t-mej"><div class="code">SF</div><b>Sifones</b><small>5 unidades</small></div>
+    </div>`;
+    catalogo({
+      title: "Reactivas / emergencias",
+      extra: tabsUrg("reactivas.html") + stock,
+      note: "Aviso de recepción o huésped. Registrar visita = intervención nueva. Modificar cambia qué se rompió o la zona.",
+      rows: MG.reactivas,
+      filterKey: "zona",
+      filterAll: "Todas las zonas",
+      searchPlaceholder: "Buscar recambio o habitación",
+      searchKeys: ["que", "zona", "stock", "quien", "detalle"],
+      pickLabel: (r) => r.que + " · " + r.zona,
+      nameKey: "que",
+      editKeys: ["que", "zona", "stock", "costo"],
+      cols: [
+        { key: "que", label: "Qué se rompió" },
+        { key: "zona", label: "Zona" },
+        { key: "stock", label: "Stock" },
+        { key: "ultima", label: "Última", chip: true, warnEmpty: true },
+        { key: "quien", label: "Quién" },
+        { key: "detalle", label: "Detalle" }
+      ]
+    });
+  </script>
 </body>
 </html>

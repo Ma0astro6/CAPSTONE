@@ -21,7 +21,7 @@ function headerHTML(rol, crumbs) {
   return `
     <header class="topbar">
       <div class="logo-wrap">${LOGO}</div>
-      <div><small>Obras · Mantención · Mejora</small></div>
+      <div class="brand-line"><small>Obras · Mantención · Mejora</small></div>
       ${back}
       <div class="spacer"></div>
       <div class="who">${who}</div>
@@ -40,19 +40,23 @@ function crumbHTML(items) {
 }
 
 function pizarraHTML() {
-  const posits = [
-    { color: "rosa", cuando: "Hoy", texto: "Hab. 107 — tapa WC. Stock: 2 en bodega.", href: "reactivas.html" },
-    { color: "amarillo", cuando: "Quedan 3 días", texto: "Tratamiento de agua potable (fosa / pozo).", href: "fosas.html" },
-    { color: "verde", cuando: "En 5 días", texto: "Pintar reja de acceso — plan anual de obras.", href: "mejoras.html" },
-    { color: "azul", cuando: "Comprar", texto: "Silicona sanitaria: stock 0. Pedir a Easy.", href: "bodega-insumos.html" },
-    { color: "lila", cuando: "Semestre", texto: "Caldera hotel — próxima visita externa.", href: "maquinas.html" }
+  const dias = [
+    { color: "rosa", dow: "Mar", dia: "29", cuando: "Hoy", texto: "Hab. 107 — tapa WC. Stock: 2 en bodega.", href: "reactivas.html" },
+    { color: "amarillo", dow: "Vie", dia: "2", cuando: "3 días", texto: "Tratamiento de agua potable (fosa / pozo).", href: "fosas.html" },
+    { color: "verde", dow: "Dom", dia: "4", cuando: "5 días", texto: "Pintar reja de acceso — plan anual.", href: "mejoras.html" },
+    { color: "azul", dow: "Pend.", dia: "!", cuando: "Comprar", texto: "Silicona sanitaria: stock 0.", href: "bodega-insumos.html" },
+    { color: "lila", dow: "Oct", dia: "12", cuando: "Semestre", texto: "Caldera hotel — visita externa.", href: "maquinas.html" }
   ];
   return `
-    <section class="pizarra" aria-label="Pizarra: lo que viene">
-      <p class="pizarra-titulo">Pizarra · lo que viene</p>
+    <section class="pizarra" aria-label="Calendario: lo que viene">
+      <div class="agenda-head">
+        <p class="pizarra-titulo">Calendario</p>
+        <span class="agenda-rango">Lo que viene · semana del 29 de septiembre</span>
+      </div>
       <div class="posits">
-        ${posits.map((p) => `
+        ${dias.map((p) => `
           <a class="posit ${p.color}" href="${p.href}">
+            <span class="cal-date"><b>${p.dia}</b>${p.dow}</span>
             <span class="cuando">${p.cuando}</span>
             <p>${p.texto}</p>
           </a>`).join("")}
@@ -60,11 +64,39 @@ function pizarraHTML() {
     </section>`;
 }
 
-function mount(crumbs) {
+function ganttHTML() {
+  const filas = [
+    { nom: "Caldera (MG)", left: "18%", width: "8%", color: "#2a6f8a" },
+    { nom: "Agua potable (MG)", left: "0%", width: "100%", color: "rgba(58,125,76,.45)" },
+    { nom: "Poda de altura (ME)", left: "52%", width: "8%", color: "#3a7d4c" },
+    { nom: "Reja de acceso (ME)", left: "68%", width: "10%", color: "#c4783a" },
+    { nom: "Hab. 107 (RE)", left: "70%", width: "6%", color: "#c4783a" },
+    { nom: "Hab. 201 (RE)", left: "74%", width: "12%", color: "#c4783a" }
+  ];
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  return `
+    <section class="gantt-board" aria-label="Carta Gantt">
+      <div class="agenda-head">
+        <p class="pizarra-titulo">Carta Gantt</p>
+        <span class="agenda-rango">Año 2026 · azul MG · verde ME · naranjo RE</span>
+      </div>
+      <div class="gantt-axis"><span></span><div>${meses.map((m) => `<i>${m}</i>`).join("")}</div></div>
+      ${filas.map((f) => `
+        <div class="gantt-row">
+          <b>${f.nom}</b>
+          <div class="gantt-bar"><i style="left:${f.left};width:${f.width};background:${f.color}"></i></div>
+        </div>`).join("")}
+    </section>`;
+}
+
+function mount(crumbs, opts) {
   const rol = sessionStorage.getItem("rol") || "admin";
   const host = document.getElementById("shell");
   if (!host) return;
-  host.insertAdjacentHTML("afterbegin", headerHTML(rol, crumbs) + pizarraHTML() + crumbHTML(crumbs));
+  host.insertAdjacentHTML("afterbegin", headerHTML(rol, crumbs) + crumbHTML(crumbs));
+  if (opts && opts.agenda) {
+    host.insertAdjacentHTML("beforeend", pizarraHTML() + ganttHTML());
+  }
 }
 
 function login(rol) {

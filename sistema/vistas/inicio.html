@@ -4,25 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inicio — Obras Elalmendro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <div class="grid-3" style="margin-bottom:14px">
-        <a class="tile t-man" href="mantencion.html"><h3>Mantención general</h3><p>Máquinas, fosas, bodegas, jardín, baños, TVs, puertas</p><span class="code">MG</span></a>
+      <p class="page-kicker">Área interna</p>
+      <h2 class="page-title">¿Qué quieres ver?</h2>
+      <div class="grid-3">
+        <a class="tile t-man" href="mantencion.html"><h3>Mantención general</h3><p>Las planillas de Andrés: buscar, filtrar y registrar visita</p><span class="code">MG</span></a>
         <a class="tile t-mej" href="mejoras.html"><h3>Mejoras</h3><p>Por hacer, plan anual y proyectos valorizados</p><span class="code">ME</span></a>
         <a class="tile t-rem" href="remodelaciones.html"><h3>Remodelaciones</h3><p>Zonas del predio, compras, proveedores y Gantt</p><span class="code">RE</span></a>
-      </div>
-      <div class="grid-3">
-        <a class="tile t-act" href="activos.html"><h3>Activo fijo</h3><p>Fichas y garantías (caldera, bombas, TVs)</p><span class="code">AF</span></a>
-        <a class="tile t-pre" href="presupuesto.html"><h3>Presupuesto</h3><p>Compras con IVA y saldo del mes</p><span class="code">PR</span></a>
-        <a class="tile t-dark" href="gantt.html"><h3>Carta Gantt</h3><p>Hitos de remodelación y plan anual</p><span class="code">CG</span></a>
       </div>
     </main>
   </div>
   <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"}]);</script>
+  <script>mount([{label:"Inicio", href:"inicio.html"}], { agenda: true });</script>
 </body>
 </html>
