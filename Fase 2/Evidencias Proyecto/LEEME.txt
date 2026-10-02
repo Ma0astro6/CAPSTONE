@@ -1,0 +1,2 @@
+La aplicación del proyecto está en la carpeta sistema, en la raíz del repositorio.
+La base de datos todavía no está. El prototipo guarda los datos en el navegador.
