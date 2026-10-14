@@ -5,41 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mantención general</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <link rel="stylesheet" href="../css/estilos.css?v=11" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="page-kicker">Listas de Andrés</p>
-      <h2 class="page-title">Mantención general</h2>
-      <p class="note">Cada recuadro es una planilla. Entras, buscas y registras la visita. Las reactivas son el mismo módulo, con urgencia.</p>
+      <p class="page-kicker">Mantención general</p>
+      <h2 class="page-title">Elige un grupo, después la lista</h2>
+      <p class="note">Cuatro bloques en vez de doce recuadros. Adentro está cada planilla de Andrés.</p>
 
-      <p class="group-label">Equipos · las 3 hojas de LISTA DE MANTENCIONES</p>
-      <div class="subgrid">
-        <a class="tile t-man sm" href="maquinas.html"><h3>Máquinas</h3><p id="n-maq">Hoja Máquinas</p></a>
-        <a class="tile t-man sm" href="radiadores.html"><h3>Radiadores</h3><p id="n-rad">Hoja Radiadores</p></a>
-        <a class="tile t-man sm" href="refrigeradores.html"><h3>Refrigeradores</h3><p id="n-ref">Hoja Refrigerador</p></a>
-      </div>
+      <div class="deck-board">
+        <section class="deck">
+          <div class="deck-head">
+            <h3>Equipos</h3>
+            <span class="deck-tag">Lista</span>
+          </div>
+          <a class="quest" href="maquinas.html"><b>Máquinas</b><span id="n-maq">—</span></a>
+          <a class="quest" href="radiadores.html"><b>Radiadores</b><span id="n-rad">—</span></a>
+          <a class="quest" href="refrigeradores.html"><b>Refrigeradores</b><span id="n-ref">—</span></a>
+        </section>
 
-      <p class="group-label">Predio</p>
-      <div class="subgrid">
-        <a class="tile t-man sm" href="fosas.html"><h3>Fosas y agua</h3><p id="n-fos">Fosas, graseras, planta</p></a>
-        <a class="tile t-man sm" href="bodegas.html"><h3>Bodegas</h3><p id="n-bod">Revisión de recintos</p></a>
-        <a class="tile t-man sm" href="jardin.html"><h3>Jardinería</h3><p id="n-jar">4 sectores y riego</p></a>
-      </div>
+        <section class="deck">
+          <div class="deck-head">
+            <h3>Predio</h3>
+            <span class="deck-tag">Lista</span>
+          </div>
+          <a class="quest" href="fosas.html"><b>Fosas y agua</b><span id="n-fos">—</span></a>
+          <a class="quest" href="bodegas.html"><b>Bodegas</b><span id="n-bod">—</span></a>
+          <a class="quest" href="jardin.html"><b>Jardinería</b><span id="n-jar">—</span></a>
+        </section>
 
-      <p class="group-label">Habitaciones y recintos</p>
-      <div class="subgrid">
-        <a class="tile t-man sm" href="banos.html"><h3>Baños</h3><p id="n-ban">Por habitación</p></a>
-        <a class="tile t-man sm" href="tvs.html"><h3>Televisores</h3><p id="n-tv">Marca y pulgadas</p></a>
-        <a class="tile t-man sm" href="pilas.html"><h3>Pilas</h3><p id="n-pil">TV y decodificador</p></a>
-        <a class="tile t-man sm" href="puertas.html"><h3>Puertas</h3><p id="n-pue">Engrase y aceite</p></a>
-      </div>
+        <section class="deck">
+          <div class="deck-head">
+            <h3>Habitaciones</h3>
+            <span class="deck-tag">Lista</span>
+          </div>
+          <a class="quest" href="banos.html"><b>Baños</b><span id="n-ban">—</span></a>
+          <a class="quest" href="tvs.html"><b>Televisores</b><span id="n-tv">—</span></a>
+          <a class="quest" href="pilas.html"><b>Pilas</b><span id="n-pil">—</span></a>
+          <a class="quest" href="puertas.html"><b>Puertas</b><span id="n-pue">—</span></a>
+        </section>
 
-      <p class="group-label">Urgencias y prevención</p>
-      <div class="grid-2">
-        <a class="tile t-rea" href="reactivas.html"><h3>Reactivas</h3><p>Aviso de recepción o huésped</p></a>
-        <a class="tile t-dark" href="prevencion.html"><h3>Prevención</h3><p>Gantt de Esteban Ortiz (OSH)</p></a>
+        <section class="deck urgente">
+          <div class="deck-head">
+            <h3>Urgencias</h3>
+            <span class="deck-tag">Prioridad</span>
+          </div>
+          <a class="quest hot" href="reactivas.html"><b>Reactivas</b><span>aviso</span></a>
+          <a class="quest" href="prevencion.html"><b>Prevención</b><span id="n-pre">—</span></a>
+        </section>
       </div>
     </main>
   </div>
@@ -58,6 +72,7 @@
     set("n-tv", MG.tvs.length, "TVs");
     set("n-pil", MG.pilas.length, "zonas");
     set("n-pue", MG.puertas.length, "puertas");
+    set("n-pre", MG.prevencion.length, "tareas");
   </script>
 </body>
 </html>

@@ -11,7 +11,7 @@
   <div id="shell"><main class="main"></main></div>
   <script src="../js/datos-mg.js"></script>
   <script src="../js/app.js"></script>
-  <script src="../js/catalogo.js"></script>
+  <script src="../js/catalogo.js?v=7"></script>
   <script>
     mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Reactivas", href:"reactivas.html"}], { agenda: false });
     const stock = `<div class="mini-tiles" style="justify-content:center;margin-bottom:14px">
@@ -36,8 +36,7 @@
         { key: "zona", label: "Zona" },
         { key: "stock", label: "Stock" },
         { key: "ultima", label: "Última", chip: true, warnEmpty: true },
-        { key: "quien", label: "Quién" },
-        { key: "detalle", label: "Detalle" }
+        { key: "quien", label: "Quién" }
       ]
     });
   </script>

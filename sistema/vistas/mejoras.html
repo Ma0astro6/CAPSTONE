@@ -4,61 +4,72 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mejoras</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=11" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="note">Tres capas como los Excel de “Mejoras / proyectos futuros”: ideas por hacer, plan anual (obras y jardín) y proyectos ya valorizados para jefes.</p>
+      <p class="page-kicker">Mejoras</p>
+      <h2 class="page-title">Ideas, plan anual y proyectos</h2>
+      <p class="note">Las ideas nuevas se cargan aquí. Después pasan a valorizar, plan anual o remodelación. Inicio solo muestra lo ya programado.</p>
+
       <div class="kpi">
         <div class="box"><span>Carpeta valorizada</span><b>$ 4.2M</b></div>
         <div class="box"><span>Plan anual obras 2026</span><b>$ 1.5M</b></div>
-        <div class="box"><span>Ideas sin valorizar</span><b>6</b></div>
+        <div class="box"><span>Ideas sin valorizar</span><b id="kpi-ideas">—</b></div>
       </div>
 
       <h3 style="margin:18px 0 8px">Por hacer (ideas)</h3>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Idea</th>
-            <th>Área</th>
-            <th>Quién la propone</th>
-            <th>Estado</th>
-            <th>Pasa a</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Zona parrilla eventos</td>
-            <td>Obras</td>
-            <td>Equipo</td>
-            <td><span class="chip">Idea</span></td>
-            <td>Valorizar</td>
-          </tr>
-          <tr>
-            <td>Línea de árboles acceso</td>
-            <td>Jardín</td>
-            <td>Andrés</td>
-            <td><span class="chip">Idea</span></td>
-            <td>Plan anual jardín</td>
-          </tr>
-          <tr>
-            <td>Iluminación sendero cabañas</td>
-            <td>Obras</td>
-            <td>Equipo</td>
-            <td><span class="chip">En estudio</span></td>
-            <td>Cotizar</td>
-          </tr>
-          <tr>
-            <td>Techumbre bodega jardín</td>
-            <td>Obras</td>
-            <td>Mantención</td>
-            <td><span class="chip warn">Urgente (humedad)</span></td>
-            <td>Remodelación / compra</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="work-wrap">
+        <div>
+          <div class="table-scroll">
+            <table class="data" id="tbl-ideas">
+              <thead>
+                <tr>
+                  <th>Idea</th>
+                  <th>Área</th>
+                  <th>Quién la propone</th>
+                  <th>Estado</th>
+                  <th>Pasa a</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="panel visita">
+          <h3>Nueva idea</h3>
+          <p class="muted-mini" id="idea-msg">Queda en la lista de Por hacer. No entra al Gantt hasta que pase a plan anual.</p>
+          <label for="i-titulo">Idea *</label>
+          <input id="i-titulo" type="text" placeholder="Ej. iluminación sendero cabañas" />
+          <label for="i-area">Área *</label>
+          <select id="i-area">
+            <option value="Obras">Obras</option>
+            <option value="Jardín">Jardín</option>
+            <option value="Equipos">Equipos</option>
+          </select>
+          <label for="i-quien">Quién la propone *</label>
+          <input id="i-quien" type="text" placeholder="Andrés, Equipo, Mantención…" />
+          <label for="i-estado">Estado</label>
+          <select id="i-estado">
+            <option value="Idea">Idea</option>
+            <option value="En estudio">En estudio</option>
+            <option value="Urgente">Urgente</option>
+          </select>
+          <label for="i-pasa">Pasa a</label>
+          <select id="i-pasa">
+            <option value="Valorizar">Valorizar</option>
+            <option value="Cotizar">Cotizar</option>
+            <option value="Plan anual obras">Plan anual obras</option>
+            <option value="Plan anual jardín">Plan anual jardín</option>
+            <option value="Remodelación / compra">Remodelación / compra</option>
+          </select>
+          <label for="i-nota">Nota (opcional)</label>
+          <textarea id="i-nota" rows="2" placeholder="Por qué importa o qué falta cotizar"></textarea>
+          <button class="btn btn-full" type="button" id="i-ok">Agregar idea</button>
+        </aside>
+      </div>
 
       <h3 style="margin:22px 0 8px">Plan anual 2026 — obras</h3>
       <table class="data">
@@ -130,7 +141,87 @@
       </div>
     </main>
   </div>
-  <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mejoras", href:"mejoras.html"}]);</script>
+  <script src="../js/app.js?v=10"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mejoras", href:"mejoras.html"}], { agenda: false });
+
+    const SEED = [
+      { titulo: "Zona parrilla eventos", area: "Obras", quien: "Equipo", estado: "Idea", pasa: "Valorizar", nota: "" },
+      { titulo: "Línea de árboles acceso", area: "Jardín", quien: "Andrés", estado: "Idea", pasa: "Plan anual jardín", nota: "" },
+      { titulo: "Iluminación sendero cabañas", area: "Obras", quien: "Equipo", estado: "En estudio", pasa: "Cotizar", nota: "" },
+      { titulo: "Techumbre bodega jardín", area: "Obras", quien: "Mantención", estado: "Urgente", pasa: "Remodelación / compra", nota: "Humedad" }
+    ];
+
+    function loadIdeas() {
+      try {
+        const raw = sessionStorage.getItem("IDEAS_ME");
+        if (raw) return JSON.parse(raw);
+      } catch (e) { /* prototipo */ }
+      return SEED.slice();
+    }
+
+    function saveIdeas(list) {
+      sessionStorage.setItem("IDEAS_ME", JSON.stringify(list));
+    }
+
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function chipEstado(estado) {
+      if (estado === "Urgente") return '<span class="chip warn">Urgente</span>';
+      if (estado === "En estudio") return '<span class="chip">En estudio</span>';
+      return '<span class="chip">Idea</span>';
+    }
+
+    let ideas = loadIdeas();
+    const tbody = document.querySelector("#tbl-ideas tbody");
+    const kpi = document.getElementById("kpi-ideas");
+    const msg = document.getElementById("idea-msg");
+
+    function pintar() {
+      kpi.textContent = String(ideas.length);
+      tbody.innerHTML = ideas.map((i) => `
+        <tr>
+          <td>${esc(i.titulo)}${i.nota ? "<br><small class='muted-mini'>" + esc(i.nota) + "</small>" : ""}</td>
+          <td>${esc(i.area)}</td>
+          <td>${esc(i.quien)}</td>
+          <td>${chipEstado(i.estado)}</td>
+          <td>${esc(i.pasa)}</td>
+        </tr>`).join("") || "<tr><td colspan='5'>Aún no hay ideas. Usa el formulario de la derecha.</td></tr>";
+    }
+
+    function limpiar() {
+      document.getElementById("i-titulo").value = "";
+      document.getElementById("i-area").value = "Obras";
+      document.getElementById("i-quien").value = "";
+      document.getElementById("i-estado").value = "Idea";
+      document.getElementById("i-pasa").value = "Valorizar";
+      document.getElementById("i-nota").value = "";
+    }
+
+    document.getElementById("i-ok").addEventListener("click", () => {
+      const titulo = document.getElementById("i-titulo").value.trim();
+      const area = document.getElementById("i-area").value;
+      const quien = document.getElementById("i-quien").value.trim();
+      const estado = document.getElementById("i-estado").value;
+      const pasa = document.getElementById("i-pasa").value;
+      const nota = document.getElementById("i-nota").value.trim();
+      if (!titulo || !quien) {
+        msg.textContent = "Faltan la idea o quién la propone.";
+        return;
+      }
+      ideas.unshift({ titulo, area, quien, estado, pasa, nota });
+      saveIdeas(ideas);
+      limpiar();
+      pintar();
+      msg.innerHTML = "Idea agregada: <b>" + esc(titulo) + "</b>.";
+    });
+
+    pintar();
+  </script>
 </body>
 </html>

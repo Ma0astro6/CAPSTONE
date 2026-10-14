@@ -149,22 +149,39 @@ function catalogo(cfg) {
         </div>
         <div class="table-scroll">
           <table class="data" id="tbl">
-            <thead><tr>${cols.map((c) => `<th>${c.label}</th>`).join("")}<th>Acciones</th></tr></thead>
+            <thead><tr>${cols.map((c, i) => `<th class="${i === 0 ? "col-nom" : ""} ${c.chip ? "col-fecha" : ""}">${c.label}</th>`).join("")}<th class="col-act">Acciones</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
       </div>
       <aside class="panel visita">
         <h3>Registrar visita</h3>
-        <p class="muted-mini" id="sel-label">Elige una fila. Este recuadro es solo para una visita <b>nueva</b> (no edita la ficha).</p>
-        <label>Fecha</label>
+        <p class="muted-mini" id="sel-label">Elige una fila. Se abre una visita <b>nueva</b> (no edita la ficha).</p>
+        <div class="ficha-pick" id="v-ficha">Sin ítem elegido.</div>
+        <label>Fecha *</label>
         <input id="v-fecha" type="date" />
-        <label>Quién lo hizo</label>
-        <input id="v-quien" type="text" placeholder="Nombre o empresa" />
-        <label>Detalle</label>
-        <textarea id="v-det" rows="3" placeholder="Qué se hizo ahora"></textarea>
+        <label>Tipo de trabajo *</label>
+        <select id="v-tipo">
+          <option value="Revisión">Revisión</option>
+          <option value="Limpieza">Limpieza</option>
+          <option value="Reparación">Reparación</option>
+          <option value="Recambio">Recambio</option>
+          <option value="Succión / tratamiento">Succión / tratamiento</option>
+          <option value="Preventiva">Preventiva</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <label>Quién lo hizo *</label>
+        <input id="v-quien" type="text" placeholder="Nombre (ej. Palito-Jorge)" />
+        <label>Empresa / proveedor</label>
+        <input id="v-emp" type="text" placeholder="Cosmoplas, interno, camión…" />
+        <label>Trabajo realizado *</label>
+        <textarea id="v-det" rows="3" placeholder="Qué se hizo, piezas, observaciones"></textarea>
+        <label>Costo (CLP)</label>
+        <input id="v-costo" type="text" inputmode="numeric" placeholder="Opcional" />
+        <label>Próxima visita</label>
+        <input id="v-prox" type="date" />
         <button class="btn btn-full" type="button" id="v-ok">Agregar visita</button>
-        <p class="muted-mini">Para cambiar nombre, zona o proveedor usa <b>Modificar</b> en la fila. El historial está en <b>Ver detalle</b>.</p>
+        <p class="muted-mini">Nombre, zona o proveedor fijos: <b>Modificar</b>. Historial: <b>Ver detalle</b>.</p>
       </aside>
     </div>
     <div class="modal-bg" id="modal" hidden>
@@ -265,8 +282,16 @@ function catalogo(cfg) {
         `<div><dt>${c.label}</dt><dd>${row[c.key] ? esc(row[c.key]) : "—"}</dd></div>`
       ).join("")}</dl>
       <h4 class="mini-h">Historial de visitas</h4>
-      ${hist.length ? `<table class="data"><thead><tr><th>Fecha</th><th>Quién</th><th>Detalle</th></tr></thead>
-        <tbody>${hist.map((v) => `<tr><td>${v.fecha ? esc(v.fecha) : "—"}</td><td>${esc(v.quien) || "—"}</td><td>${esc(v.detalle) || "—"}</td></tr>`).join("")}</tbody></table>`
+      ${hist.length ? `<table class="data hist"><thead><tr><th>Fecha</th><th>Tipo</th><th>Quién</th><th>Empresa</th><th>Trabajo</th><th>Costo</th><th>Próxima</th></tr></thead>
+        <tbody>${hist.map((v) => `<tr>
+          <td>${v.fecha ? esc(v.fecha) : "—"}</td>
+          <td>${esc(v.tipo) || "—"}</td>
+          <td>${esc(v.quien) || "—"}</td>
+          <td>${esc(v.empresa) || "—"}</td>
+          <td>${esc(v.detalle) || "—"}</td>
+          <td>${esc(v.costo) || "—"}</td>
+          <td>${esc(v.proxima) || "—"}</td>
+        </tr>`).join("")}</tbody></table>`
         : "<p class=\"muted-mini\">Aún no hay visitas registradas.</p>"}
       <p class="muted-mini" style="margin-top:12px">Cierra y usa Registrar visita para agregar una línea nueva. No se borra lo anterior.</p>`;
     modal.hidden = false;
@@ -306,16 +331,29 @@ function catalogo(cfg) {
       return;
     }
     selected = i;
-    main.querySelector("#sel-label").innerHTML =
-      "Visita nueva para: <b>" + esc(labelOf(cfg.rows[i])) + "</b>. Completa fecha, quién y detalle (vacío a propósito).";
-    main.querySelector("#v-fecha").value = hoyISO();
-    main.querySelector("#v-quien").value = "";
-    main.querySelector("#v-det").value = "";
+    const row = cfg.rows[i];
+    resetVisit();
+    main.querySelector("#sel-label").innerHTML = "Visita nueva. Completa lo marcado con *.";
+    main.querySelector("#v-ficha").innerHTML =
+      "<b>" + esc(labelOf(row)) + "</b>" +
+      (row.ubicacion ? "<small>" + esc(row.ubicacion) + "</small>" : "") +
+      (row.proveedor ? "<small>Proveedor ficha: " + esc(row.proveedor) + "</small>" : "");
+    main.querySelector("#v-emp").value = row.proveedor || "";
     paint();
   });
 
   main.querySelector("#modal-x").addEventListener("click", closeModal);
   modal.addEventListener("click", (ev) => { if (ev.target === modal) closeModal(); });
+
+  function resetVisit() {
+    main.querySelector("#v-fecha").value = hoyISO();
+    main.querySelector("#v-tipo").value = "Revisión";
+    main.querySelector("#v-quien").value = "";
+    main.querySelector("#v-emp").value = "";
+    main.querySelector("#v-det").value = "";
+    main.querySelector("#v-costo").value = "";
+    main.querySelector("#v-prox").value = "";
+  }
 
   main.querySelector("#v-ok").addEventListener("click", () => {
     if (selected < 0) {
@@ -325,26 +363,31 @@ function catalogo(cfg) {
     const row = cfg.rows[selected];
     seedVisitas(row, cfg.dateKey);
     const fecha = isoToCl(main.querySelector("#v-fecha").value);
+    const tipo = main.querySelector("#v-tipo").value;
     const quien = main.querySelector("#v-quien").value.trim();
+    const empresa = main.querySelector("#v-emp").value.trim();
     const detalle = main.querySelector("#v-det").value.trim();
-    if (!fecha && !quien && !detalle) {
-      main.querySelector("#sel-label").textContent = "Escribe al menos quién o un detalle.";
+    const costo = main.querySelector("#v-costo").value.trim();
+    const proxima = isoToCl(main.querySelector("#v-prox").value);
+    if (!fecha || !quien || !detalle) {
+      main.querySelector("#sel-label").textContent = "Faltan fecha, quién o el trabajo realizado.";
       return;
     }
-    row.visitas.push({ fecha, quien, detalle });
+    row.visitas.push({ fecha, tipo, quien, empresa, detalle, costo, proxima });
     applyUltima(row, cfg.dateKey);
     saveMG();
-    main.querySelector("#v-quien").value = "";
-    main.querySelector("#v-det").value = "";
-    main.querySelector("#v-fecha").value = hoyISO();
+    const keepFicha = main.querySelector("#v-ficha").innerHTML;
+    resetVisit();
+    main.querySelector("#v-ficha").innerHTML = keepFicha;
+    main.querySelector("#v-emp").value = row.proveedor || "";
     main.querySelector("#sel-label").innerHTML =
-      "Visita agregada a <b>" + esc(labelOf(row)) + "</b>. Revisa el historial en Ver detalle.";
+      "Visita agregada a <b>" + esc(labelOf(row)) + "</b>. Quedó en Ver detalle.";
     paint();
   });
 
   q.addEventListener("input", paint);
   if (f) f.addEventListener("change", paint);
   ord.addEventListener("change", paint);
-  main.querySelector("#v-fecha").value = hoyISO();
+  resetVisit();
   paint();
 }
