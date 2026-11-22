@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Usuarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=52" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="page-kicker">Administración</p>
+      <h2 class="page-title">Usuarios</h2>
+      <p class="muted-mini" id="usr-msg">Cargando…</p>
+
+      <section class="perm-card">
+        <div class="acc-head">
+          <div>
+            <h3>Cuentas</h3>
+            <p>Crea, edita o elimina quién puede entrar al sistema.</p>
+          </div>
+          <div class="acc-btns">
+            <button class="btn" type="button" id="btn-tipo">+ Nuevo tipo</button>
+            <button class="btn" type="button" id="btn-mostrar-form">+ Nuevo usuario</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data accesos" id="tabla-usuarios">
+            <thead>
+              <tr>
+                <th class="col-user">Usuario</th>
+                <th>Correo</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <div class="modal-bg" id="form-usuario" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="form-titulo">
+      <div class="modal-head">
+        <h3 id="form-titulo">Nuevo usuario</h3>
+        <button class="btn btn-ghost" type="button" id="form-x">Cerrar</button>
+      </div>
+      <div class="form-grid">
+        <div><label for="u-nombre">Nombre</label><input id="u-nombre" type="text" placeholder="Nombre y apellido" /></div>
+        <div><label for="u-login">Nombre de usuario</label><input id="u-login" type="text" placeholder="juan.perez" autocomplete="off" /></div>
+        <div><label for="u-correo">Correo</label><input id="u-correo" type="email" placeholder="juan@elalmendro.cl" /></div>
+        <div><label for="u-clave" id="u-clave-label">Contraseña</label><input id="u-clave" type="password" autocomplete="new-password" /></div>
+        <div>
+          <label for="u-rol">Tipo de usuario</label>
+          <select id="u-rol"></select>
+        </div>
+      </div>
+      <button class="btn" type="button" id="btn-guardar-usuario" style="margin-top:12px">Guardar usuario</button>
+      <button class="btn" type="button" id="btn-cancelar" style="margin-top:12px;margin-left:8px;background:#6d6456">Cancelar</button>
+    </div>
+  </div>
+  <div class="modal-bg" id="modal-tipo" hidden>
+    <div class="modal-card modal-angosta" role="dialog" aria-modal="true" aria-labelledby="tipo-titulo">
+      <div class="modal-head">
+        <h3 id="tipo-titulo">Nuevo tipo de usuario</h3>
+        <button class="btn btn-ghost" type="button" id="tipo-x">Cerrar</button>
+      </div>
+      <p class="muted-mini">Queda en el selector al crear una cuenta. Después, en Permisos, se elige qué menú ve.</p>
+      <label for="rol-nombre">Nombre del tipo</label>
+      <input id="rol-nombre" type="text" placeholder="Ej. Jefe de turno" />
+      <p class="muted-mini" id="rol-msg"></p>
+      <button class="btn" type="button" id="btn-rol" style="margin-top:12px">Crear tipo</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/app.js?v=45"></script>
+  <script src="../js/usuarios.js?v=12"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Usuarios", href:"usuarios.html"}]);
+    USR.montarUsuarios();
+  </script>
+</body>
+</html>

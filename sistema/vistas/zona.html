@@ -4,79 +4,141 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zona</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=52" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="note" id="nota">Cada zona tiene compras (ítem, proveedor, neto, IVA, estado) e hitos para el Gantt. Si no hay filas, la zona está en catálogo pero aún sin obra abierta.</p>
-      <h2 id="titulo" style="margin-top:0"></h2>
-      <div class="panel" style="margin-bottom:14px">
-        <h3>Nueva línea de compra</h3>
+      <p class="page-kicker">Remodelaciones</p>
+      <h2 class="page-title" id="titulo">Zona</h2>
+      <p class="note">La obra guarda compras e hitos. El IVA es el 19% del neto y no se escribe a mano. Un hito con inicio y fin aparece en la carta Gantt.</p>
+      <p class="muted-mini" id="zona-msg">Cargando…</p>
+
+      <section class="panel" id="bloque-abrir" hidden>
+        <h3>Abrir obra</h3>
         <div class="form-grid">
-          <div><label>Ítem</label><input placeholder="Ej. pintura interior 4 L" /></div>
-          <div><label>Proveedor</label><input placeholder="Sodimac / ferretería" /></div>
-          <div><label>Cantidad</label><input value="1" /></div>
-          <div><label>Neto unitario</label><input placeholder="32990" /></div>
-          <div><label>IVA (19%)</label><input value="Automático en Fase 3" readonly /></div>
-          <div><label>Estado</label><input value="Cotizado" /></div>
+          <div><label for="obra-nombre">Nombre</label><input id="obra-nombre" type="text" /></div>
+          <div>
+            <label for="obra-tipo">Tipo</label>
+            <select id="obra-tipo">
+              <option value="remodelacion">Remodelación</option>
+              <option value="renovacion">Renovación</option>
+              <option value="pintura">Pintura</option>
+              <option value="reparacion">Reparación</option>
+            </select>
+          </div>
+          <div><label for="obra-inicio">Inicio</label><input id="obra-inicio" type="date" /></div>
+          <div><label for="obra-fin">Fin planificado</label><input id="obra-fin" type="date" /></div>
+          <div><label for="obra-presupuesto">Presupuesto (opcional)</label><input id="obra-presupuesto" type="number" min="0" step="1" placeholder="150000" /></div>
+          <div class="full"><label for="obra-notas">Descripción</label><textarea id="obra-notas" rows="3" placeholder="Qué se va a hacer: pintar, cambiar piso, reparar el baño…"></textarea></div>
         </div>
-        <button class="btn" type="button" style="margin-top:12px">Agregar (no graba aún)</button>
-      </div>
-      <h3>Compras de esta zona</h3>
-      <table class="data" id="tabla-compras">
-        <thead>
-          <tr>
-            <th>Ítem</th>
-            <th>Proveedor</th>
-            <th>Estado</th>
-            <th>Neto</th>
-            <th>IVA 19%</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <h3 style="margin-top:22px">Hitos / Gantt de la zona</h3>
-      <table class="data" id="tabla-hitos">
-        <thead>
-          <tr>
-            <th>Hito</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <p style="margin-top:12px"><a href="gantt.html">Ver carta Gantt global</a></p>
+        <button class="btn" type="button" id="btn-abrir" style="margin-top:12px">Abrir obra</button>
+        <ul id="obras-cerradas" class="muted-mini"></ul>
+      </section>
+
+      <section id="bloque-obra" hidden>
+        <div class="panel" style="margin-bottom:14px">
+          <h3 id="obra-titulo">Obra</h3>
+          <p class="muted-mini" id="obra-meta"></p>
+          <label for="obra-desc">Descripción</label>
+          <textarea id="obra-desc" rows="3" placeholder="Qué se está haciendo en esta pieza: pintar, cambiar piso, reparar el baño…"></textarea>
+          <button class="btn" type="button" id="btn-desc" style="margin-top:8px">Guardar descripción</button>
+          <label for="obra-estado">Estado</label>
+          <select id="obra-estado"></select>
+          <p class="muted-mini" style="margin-top:8px">Gasto con IVA: <b id="compra-total">—</b></p>
+        </div>
+
+        <h3>Compras de esta obra</h3>
+        <p class="muted-mini">Lo que se compra para esta remodelación: pintura, piso, grifería. El IVA se calcula solo, el 19% del neto.</p>
+        <div class="table-scroll">
+          <table class="data" id="tabla-compras">
+            <thead>
+              <tr>
+                <th>Ítem</th>
+                <th>Proveedor</th>
+                <th>Estado</th>
+                <th>Neto</th>
+                <th>IVA 19%</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel" style="margin:14px 0">
+          <h3>Nueva compra</h3>
+          <div class="form-grid">
+            <div><label for="compra-item">Ítem</label><input id="compra-item" type="text" placeholder="Pintura interior 4 L" /></div>
+            <div>
+              <label for="compra-prov">Proveedor</label>
+              <select id="compra-prov"></select>
+            </div>
+            <div><label for="compra-nuevo">O uno nuevo</label><input id="compra-nuevo" type="text" placeholder="Si no está en la lista" /></div>
+            <div><label for="compra-cant">Cantidad</label><input id="compra-cant" type="number" min="0.01" step="0.01" value="1" /></div>
+            <div><label for="compra-neto">Neto unitario</label><input id="compra-neto" type="number" min="0" step="1" placeholder="32990" /></div>
+            <div>
+              <label for="compra-estado">Estado</label>
+              <select id="compra-estado">
+                <option value="cotizado">Cotizado</option>
+                <option value="pedido">Pedido</option>
+                <option value="comprado">Comprado</option>
+                <option value="recibido">Recibido</option>
+                <option value="en_stock">En stock</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" type="button" id="btn-compra" style="margin-top:12px">Agregar compra</button>
+        </div>
+
+        <h3>Hitos</h3>
+        <p class="muted-mini">Los pasos de la obra. Cada uno con inicio y fin aparece en la carta Gantt.</p>
+        <div class="table-scroll">
+          <table class="data" id="tabla-hitos">
+            <thead>
+              <tr>
+                <th>Hito</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel" style="margin-top:14px">
+          <h3>Nuevo hito</h3>
+          <div class="form-grid">
+            <div><label for="hito-nombre">Nombre</label><input id="hito-nombre" type="text" placeholder="Pintura" /></div>
+            <div>
+              <label for="hito-estado">Estado</label>
+              <select id="hito-estado"></select>
+            </div>
+            <div><label for="hito-inicio">Inicio</label><input id="hito-inicio" type="date" /></div>
+            <div><label for="hito-fin">Fin</label><input id="hito-fin" type="date" /></div>
+          </div>
+          <button class="btn" type="button" id="btn-hito" style="margin-top:12px">Agregar hito</button>
+        </div>
+        <p style="margin-top:12px"><a href="gantt.html">Ver carta Gantt</a></p>
+      </section>
     </main>
   </div>
-  <script src="../js/datos.js"></script>
-  <script src="../js/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/app.js?v=45"></script>
+  <script src="../js/remodelaciones.js?v=8"></script>
   <script>
-    const id = qs("z") || "107";
-    const zona = (typeof ZONAS_RE !== "undefined" ? ZONAS_RE : []).find((z) => z.id === id);
-    const nombre = zona ? zona.nombre : "Zona " + id;
-    document.getElementById("titulo").textContent = nombre + (zona ? " · " + zona.tipo : "");
-    mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:nombre, href:"zona.html?z="+id}]);
-    const compras = (COMPRAS_ZONA[id] || []);
-    const hitos = (HITOS_ZONA[id] || []);
-    const tbC = document.querySelector("#tabla-compras tbody");
-    if (!compras.length) {
-      tbC.innerHTML = "<tr><td colspan='6'>Sin compras cargadas. Esta zona existe en el catálogo (como carpeta vacía en Drive).</td></tr>";
+    const codigo = qs("z") || "";
+    mount([
+      {label:"Inicio", href:"inicio.html"},
+      {label:"Remodelaciones", href:"remodelaciones.html"},
+      {label: codigo || "Zona", href:"zona.html?z=" + encodeURIComponent(codigo)}
+    ]);
+    if (!codigo) {
+      document.getElementById("zona-msg").textContent = "Falta el código de la zona.";
     } else {
-      tbC.innerHTML = compras.map((c) => {
-        const iva = Math.round(c.neto * 0.19);
-        return `<tr><td>${c.item}</td><td>${c.proveedor}</td><td>${c.estado}</td><td class="num">${clp(c.neto)}</td><td class="num">${clp(iva)}</td><td class="num money">${clp(c.neto+iva)}</td></tr>`;
-      }).join("");
-    }
-    const tbH = document.querySelector("#tabla-hitos tbody");
-    if (!hitos.length) {
-      tbH.innerHTML = "<tr><td colspan='4'>Sin hitos. Cuando parta la obra se agregan fechas y alimentan el Gantt.</td></tr>";
-    } else {
-      tbH.innerHTML = hitos.map((h) => `<tr><td>${h.hito}</td><td>${h.inicio}</td><td>${h.fin}</td><td>${h.estado}</td></tr>`).join("");
+      RE.montarZona(codigo);
     }
   </script>
 </body>

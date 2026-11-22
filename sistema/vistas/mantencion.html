@@ -5,74 +5,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mantención general</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css?v=11" />
+  <link rel="stylesheet" href="../css/estilos.css?v=52" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
       <p class="page-kicker">Mantención general</p>
-      <h2 class="page-title">Elige un grupo, después la lista</h2>
-      <p class="note">Cuatro bloques en vez de doce recuadros. Adentro está cada planilla de Andrés.</p>
+      <h2 class="page-title">¿Qué vas a revisar?</h2>
+      <p class="note">Primero avisos prioritarios. Después elige el mapa: equipos, predio o habitaciones. El <b>?</b> a la derecha explica cada cuadro.</p>
 
-      <div class="deck-board">
-        <section class="deck">
-          <div class="deck-head">
-            <h3>Equipos</h3>
-            <span class="deck-tag">Lista</span>
+      <a class="mg-cal" href="calendario.html">
+        <span class="mg-cal-tag">Calendario</span>
+        <div>
+          <b>Lo que se acerca</b>
+          <small>Equipos y predio · aviso cuando una mantención está cerca</small>
+        </div>
+        <span class="mg-cal-go">Abrir →</span>
+      </a>
+
+      <a class="mg-alert" data-menu="reactivas" href="reactivas.html">
+        <span class="mg-alert-tag">Prioridad</span>
+        <div>
+          <b>Reactivas</b>
+          <small>Avisos de recepción o huésped · intervención rápida · descuenta stock</small>
+        </div>
+        <span class="mg-alert-go">Abrir →</span>
+      </a>
+
+      <div class="mg-map">
+        <section class="mg-zone z-eq" data-menu="equipos">
+          <header>
+            <span class="mg-code">01</span>
+            <div>
+              <h3>Equipos</h3>
+              <p>Caldera, radiadores, refrigeradores</p>
+            </div>
+            <button type="button" class="mg-help" aria-label="Qué se hace en Equipos" data-tip="Crear anota una mantención nueva. Buscar encuentra una máquina, un radiador o un refrigerador y muestra su historial.">?</button>
+          </header>
+          <p class="mg-lead">Selecciona una opción: <b>Crear</b> para anotar una mantención nueva, o <b>Buscar</b> para encontrar una máquina, un radiador o un refrigerador.</p>
+          <div class="mg-actions">
+            <a class="mg-choice" href="equipos-crear.html"><b>Crear</b><small>Registrar una mantención</small></a>
+            <a class="mg-choice buscar" href="equipos-buscar.html"><b>Buscar</b><small>Encontrar un equipo</small></a>
           </div>
-          <a class="quest" href="maquinas.html"><b>Máquinas</b><span id="n-maq">—</span></a>
-          <a class="quest" href="radiadores.html"><b>Radiadores</b><span id="n-rad">—</span></a>
-          <a class="quest" href="refrigeradores.html"><b>Refrigeradores</b><span id="n-ref">—</span></a>
         </section>
 
-        <section class="deck">
-          <div class="deck-head">
-            <h3>Predio</h3>
-            <span class="deck-tag">Lista</span>
+        <section class="mg-zone z-pr" data-menu="predio">
+          <header>
+            <span class="mg-code">02</span>
+            <div>
+              <h3>Predio</h3>
+              <p>Fosas, bodegas y jardín del hotel</p>
+            </div>
+            <button type="button" class="mg-help" aria-label="Qué se hace en Predio" data-tip="Crear anota una succión, una bodega o una faena. Buscar encuentra ese punto y muestra su historial.">?</button>
+          </header>
+          <p class="mg-lead">Selecciona una opción: <b>Crear</b> para anotar un trabajo del predio, o <b>Buscar</b> para encontrar una fosa, una bodega o una faena de jardín.</p>
+          <div class="mg-actions">
+            <a class="mg-choice" href="predio-crear.html"><b>Crear</b><small>Registrar un trabajo</small></a>
+            <a class="mg-choice buscar" href="predio-buscar.html"><b>Buscar</b><small>Encontrar un punto</small></a>
           </div>
-          <a class="quest" href="fosas.html"><b>Fosas y agua</b><span id="n-fos">—</span></a>
-          <a class="quest" href="bodegas.html"><b>Bodegas</b><span id="n-bod">—</span></a>
-          <a class="quest" href="jardin.html"><b>Jardinería</b><span id="n-jar">—</span></a>
         </section>
 
-        <section class="deck">
-          <div class="deck-head">
-            <h3>Habitaciones</h3>
-            <span class="deck-tag">Lista</span>
+        <section class="mg-zone z-hab" data-menu="habitaciones">
+          <header>
+            <span class="mg-code">03</span>
+            <div>
+              <h3>Habitaciones</h3>
+              <p>Baños, TV, pilas y puertas</p>
+            </div>
+            <button type="button" class="mg-help" aria-label="Qué se hace en Habitaciones" data-tip="Crear anota un baño, un televisor, las pilas o una puerta. Buscar encuentra ese recinto y muestra su historial.">?</button>
+          </header>
+          <p class="mg-lead">Selecciona una opción: <b>Crear</b> para anotar una mantención, o <b>Buscar</b> para encontrar un baño, un televisor, las pilas o una puerta.</p>
+          <div class="mg-actions">
+            <a class="mg-choice" href="habitaciones-crear.html"><b>Crear</b><small>Registrar una mantención</small></a>
+            <a class="mg-choice buscar" href="habitaciones-buscar.html"><b>Buscar</b><small>Encontrar un recinto</small></a>
           </div>
-          <a class="quest" href="banos.html"><b>Baños</b><span id="n-ban">—</span></a>
-          <a class="quest" href="tvs.html"><b>Televisores</b><span id="n-tv">—</span></a>
-          <a class="quest" href="pilas.html"><b>Pilas</b><span id="n-pil">—</span></a>
-          <a class="quest" href="puertas.html"><b>Puertas</b><span id="n-pue">—</span></a>
         </section>
 
-        <section class="deck urgente">
-          <div class="deck-head">
-            <h3>Urgencias</h3>
-            <span class="deck-tag">Prioridad</span>
+        <section class="mg-zone z-prev" data-menu="prevencion">
+          <header>
+            <span class="mg-code">04</span>
+            <div>
+              <h3>Prevención</h3>
+              <p>Protocolos y capacitaciones del plan</p>
+            </div>
+            <button type="button" class="mg-help" aria-label="Qué se hace en Prevención" data-tip="Crear anota un avance de un protocolo o una capacitación. Buscar encuentra esa tarea. Plan del año muestra esas mismas tareas en la carta. Archivo guarda EPP, ropa, charlas y papeles de cada persona.">?</button>
+          </header>
+          <p class="mg-lead">Selecciona una opción: <b>Crear</b> para anotar un avance, <b>Buscar</b> para encontrar una tarea, <b>Plan del año</b> para ver la carta, o <b>Archivo</b> para la ficha de cada persona.</p>
+          <div class="mg-actions">
+            <a class="mg-choice" href="prevencion-crear.html"><b>Crear</b><small>Registrar un avance</small></a>
+            <a class="mg-choice buscar" href="prevencion-buscar.html"><b>Buscar</b><small>Encontrar una tarea</small></a>
+            <a class="mg-choice plan" href="prevencion-plan.html"><b>Plan del año</b><small>Carta de enero a diciembre</small></a>
+            <a class="mg-choice archivo" href="trabajadores.html"><b>Archivo</b><small>EPP, ropa, charlas y papeles</small></a>
           </div>
-          <a class="quest hot" href="reactivas.html"><b>Reactivas</b><span>aviso</span></a>
-          <a class="quest" href="prevencion.html"><b>Prevención</b><span id="n-pre">—</span></a>
         </section>
       </div>
     </main>
   </div>
-  <script src="../js/datos-mg.js"></script>
-  <script src="../js/app.js"></script>
+  <script src="../js/app.js?v=45"></script>
   <script>
     mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención general", href:"mantencion.html"}], { agenda: false });
-    const set = (id, n, label) => { const el = document.getElementById(id); if (el) el.textContent = n + " " + label; };
-    set("n-maq", MG.maquinas.length, "equipos");
-    set("n-rad", MG.radiadores.length, "puntos");
-    set("n-ref", MG.refrigeradores.length, "equipos");
-    set("n-fos", MG.fosas.length, "puntos");
-    set("n-bod", MG.bodegas.length, "recintos");
-    set("n-jar", MG.jardin.length, "faenas");
-    set("n-ban", MG.banos.length, "recintos");
-    set("n-tv", MG.tvs.length, "TVs");
-    set("n-pil", MG.pilas.length, "zonas");
-    set("n-pue", MG.puertas.length, "puertas");
-    set("n-pre", MG.prevencion.length, "tareas");
+
+    document.querySelectorAll(".mg-help").forEach((btn) => {
+      btn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const open = btn.classList.contains("on");
+        document.querySelectorAll(".mg-help.on").forEach((b) => b.classList.remove("on"));
+        if (!open) btn.classList.add("on");
+      });
+    });
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".mg-help.on").forEach((b) => b.classList.remove("on"));
+    });
   </script>
 </body>
 </html>

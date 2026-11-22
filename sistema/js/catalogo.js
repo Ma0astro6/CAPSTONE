@@ -78,7 +78,9 @@ function applyUltima(row, dateKey) {
 }
 
 function tabsGrupo(actual, items) {
-  return `<div class="tabs">${items.map(([h, l]) =>
+  const visibles = items.filter(([h]) => h === actual || typeof puedeAbrirHref !== "function" || puedeAbrirHref(h));
+  if (visibles.length < 2) return "";
+  return `<div class="tabs">${visibles.map(([h, l]) =>
     `<a class="${actual === h ? "on" : ""}" href="${h}">${l}</a>`
   ).join("")}</div>`;
 }
@@ -118,6 +120,24 @@ function tabsUrg(actual) {
 function catalogo(cfg) {
   const main = document.querySelector("#shell main");
   if (!main) return;
+  if (cfg.fuente && window.cargarFichas && window.db) {
+    main.innerHTML = '<p class="note">Cargando las fichas desde la base…</p>';
+    window.cargarFichas(cfg.fuente).then((rows) => {
+      cfg.rows = rows;
+      montarCatalogo(cfg);
+    }).catch((err) => {
+      console.error(err);
+      cfg.note = "No se pudo usar la base (" + (err.message || "error") + "). Se muestran los datos de esta sesión. " + (cfg.note || "");
+      montarCatalogo(cfg);
+    });
+    return;
+  }
+  montarCatalogo(cfg);
+}
+
+function montarCatalogo(cfg) {
+  const main = document.querySelector("#shell main");
+  if (!main) return;
   const cols = cfg.cols;
   const filterKey = cfg.filterKey;
   const searchKeys = cfg.searchKeys || cols.map((c) => c.key);
@@ -134,55 +154,25 @@ function catalogo(cfg) {
     <h2 class="page-title">${cfg.title}</h2>
     <p class="note">${cfg.note || ""}</p>
     ${cfg.extra || ""}
-    <div class="work-wrap">
-      <div>
-        <div class="filters" style="justify-content:flex-start">
-          <input id="q" type="search" placeholder="${cfg.searchPlaceholder || "Buscar…"}" />
-          ${filterKey ? `<select id="f"><option value="">${cfg.filterAll || "Todos"}</option></select>` : ""}
-          <select id="ord">
-            <option value="fecha-desc">Última visita: más reciente</option>
-            <option value="fecha-asc">Última visita: más antigua</option>
-            <option value="nombre">Nombre A–Z</option>
-            ${filterKey ? `<option value="filtro">${cfg.filterAll ? cfg.filterAll.replace("Todas", "Por").replace("Todos", "Por") : "Por categoría"}</option>` : ""}
-          </select>
-          <span class="cat-count" id="cnt"></span>
-        </div>
-        <div class="table-scroll">
-          <table class="data" id="tbl">
-            <thead><tr>${cols.map((c, i) => `<th class="${i === 0 ? "col-nom" : ""} ${c.chip ? "col-fecha" : ""}">${c.label}</th>`).join("")}<th class="col-act">Acciones</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-      <aside class="panel visita">
-        <h3>Registrar visita</h3>
-        <p class="muted-mini" id="sel-label">Elige una fila. Se abre una visita <b>nueva</b> (no edita la ficha).</p>
-        <div class="ficha-pick" id="v-ficha">Sin ítem elegido.</div>
-        <label>Fecha *</label>
-        <input id="v-fecha" type="date" />
-        <label>Tipo de trabajo *</label>
-        <select id="v-tipo">
-          <option value="Revisión">Revisión</option>
-          <option value="Limpieza">Limpieza</option>
-          <option value="Reparación">Reparación</option>
-          <option value="Recambio">Recambio</option>
-          <option value="Succión / tratamiento">Succión / tratamiento</option>
-          <option value="Preventiva">Preventiva</option>
-          <option value="Otro">Otro</option>
+    <div class="cat-toolbar">
+      <div class="filters" style="justify-content:flex-start;margin:0;flex:1">
+        <input id="q" type="search" placeholder="${cfg.searchPlaceholder || "Buscar…"}" />
+        ${filterKey ? `<select id="f"><option value="">${cfg.filterAll || "Todos"}</option></select>` : ""}
+        <select id="ord">
+          <option value="fecha-desc">Última visita: más reciente</option>
+          <option value="fecha-asc">Última visita: más antigua</option>
+          <option value="nombre">Nombre A–Z</option>
+          ${filterKey ? `<option value="filtro">${cfg.filterAll ? cfg.filterAll.replace("Todas", "Por").replace("Todos", "Por") : "Por categoría"}</option>` : ""}
         </select>
-        <label>Quién lo hizo *</label>
-        <input id="v-quien" type="text" placeholder="Nombre (ej. Palito-Jorge)" />
-        <label>Empresa / proveedor</label>
-        <input id="v-emp" type="text" placeholder="Cosmoplas, interno, camión…" />
-        <label>Trabajo realizado *</label>
-        <textarea id="v-det" rows="3" placeholder="Qué se hizo, piezas, observaciones"></textarea>
-        <label>Costo (CLP)</label>
-        <input id="v-costo" type="text" inputmode="numeric" placeholder="Opcional" />
-        <label>Próxima visita</label>
-        <input id="v-prox" type="date" />
-        <button class="btn btn-full" type="button" id="v-ok">Agregar visita</button>
-        <p class="muted-mini">Nombre, zona o proveedor fijos: <b>Modificar</b>. Historial: <b>Ver detalle</b>.</p>
-      </aside>
+        <span class="cat-count" id="cnt"></span>
+      </div>
+      <button type="button" class="btn btn-green" id="btn-visita">+ Agregar visita</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data" id="tbl">
+        <thead><tr>${cols.map((c, i) => `<th class="${i === 0 ? "col-nom" : ""} ${c.chip ? "col-fecha" : ""}">${c.label}</th>`).join("")}<th class="col-act">Acciones</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
     <div class="modal-bg" id="modal" hidden>
       <div class="modal-card" role="dialog" aria-modal="true">
@@ -202,6 +192,18 @@ function catalogo(cfg) {
   const modal = main.querySelector("#modal");
   const modalBody = main.querySelector("#modal-body");
   const modalTitle = main.querySelector("#modal-title");
+  let stockLista = [];
+
+  async function refrescarStock() {
+    const box = main.querySelector("#stock-box");
+    if (!cfg.conStock || !box || !window.cargarStock) return;
+    try {
+      stockLista = await window.cargarStock();
+      box.innerHTML = window.htmlStock(stockLista);
+    } catch (err) {
+      box.innerHTML = '<p class="muted-mini">' + esc(err.message || "No se pudo leer el stock.") + "</p>";
+    }
+  }
 
   if (f && filterKey) {
     uniqueVals(cfg.rows, filterKey).forEach((v) => {
@@ -263,7 +265,7 @@ function catalogo(cfg) {
       }).join("");
       return `<tr data-i="${i}"${on}>${cells}<td class="acciones">
         <button type="button" class="btn-mini" data-act="detalle">Ver detalle</button>
-        <button type="button" class="btn-mini btn-mini-gold" data-act="edit">Modificar</button>
+        <button type="button" class="btn-mini" data-act="edit">Modificar</button>
       </td></tr>`;
     }).join("") || `<tr><td colspan="${cols.length + 1}">No hay filas con ese filtro.</td></tr>`;
   }
@@ -293,7 +295,7 @@ function catalogo(cfg) {
           <td>${esc(v.proxima) || "—"}</td>
         </tr>`).join("")}</tbody></table>`
         : "<p class=\"muted-mini\">Aún no hay visitas registradas.</p>"}
-      <p class="muted-mini" style="margin-top:12px">Cierra y usa Registrar visita para agregar una línea nueva. No se borra lo anterior.</p>`;
+      <p class="muted-mini" style="margin-top:12px">Usa <b>+ Agregar visita</b> arriba para una línea nueva. No se borra lo anterior.</p>`;
     modal.hidden = false;
   }
 
@@ -309,13 +311,220 @@ function catalogo(cfg) {
       <button class="btn btn-full" type="button" id="edit-ok" style="margin-top:14px">Guardar cambios de la ficha</button>
       <p class="muted-mini">Esto no registra una visita. Solo corrige los datos de la fila (como en el Excel).</p>`;
     modal.hidden = false;
-    modalBody.querySelector("#edit-ok").onclick = () => {
+    modalBody.querySelector("#edit-ok").onclick = async () => {
       modalBody.querySelectorAll("[data-ek]").forEach((inp) => {
         row[inp.getAttribute("data-ek")] = inp.value.trim();
       });
+      try {
+        if (window.guardarFicha) await window.guardarFicha(row);
+      } catch (err) {
+        const p = document.createElement("p");
+        p.className = "muted-mini";
+        p.textContent = err.message || "No se pudo guardar en la base.";
+        modalBody.appendChild(p);
+        if (window.cuadro) cuadro("No se guardó", p.textContent);
+        return;
+      }
       saveMG();
       closeModal();
       paint();
+      if (window.cuadro) cuadro("Ficha guardada", "Los datos de " + labelOf(row) + " quedaron en la base. El historial de visitas no se tocó.");
+    };
+  }
+
+  async function openVisita(preselect) {
+    if (cfg.conStock && !stockLista.length && window.cargarStock) {
+      try { await refrescarStock(); } catch (e) { /* el recuadro ya muestra el error */ }
+    }
+    if (typeof preselect === "number" && preselect >= 0) selected = preselect;
+    const hasPre = selected >= 0 && cfg.rows[selected];
+    const opts = cfg.rows.map((row, i) =>
+      `<option value="${i}"${hasPre && i === selected ? " selected" : ""}>${esc(labelOf(row))}${row.ubicacion ? " · " + esc(row.ubicacion) : ""}</option>`
+    ).join("");
+    const pre = hasPre ? cfg.rows[selected] : null;
+    modalTitle.textContent = "Agregar visita";
+    modalBody.innerHTML = `
+      <p class="muted-mini" id="sel-label">Visita nueva. No edita la ficha; queda en el historial.</p>
+      <label for="v-item">Ítem *</label>
+      <select id="v-item">
+        <option value=""${!hasPre ? " selected" : ""}>— Elige el ítem —</option>
+        ${opts || ""}
+      </select>
+      <div class="ficha-pick" id="v-ficha" style="margin-top:10px"></div>
+      <div class="form-grid" style="margin-top:8px">
+        <div>
+          <label for="v-fecha">Fecha *</label>
+          <input id="v-fecha" type="date" value="${hoyISO()}" />
+        </div>
+        <div>
+          <label for="v-tipo">Tipo de trabajo *</label>
+          <select id="v-tipo">
+            <option value="Revisión">Revisión</option>
+            <option value="Limpieza">Limpieza</option>
+            <option value="Reparación">Reparación</option>
+            <option value="Recambio">Recambio</option>
+            <option value="Succión / tratamiento">Succión / tratamiento</option>
+            <option value="Preventiva">Preventiva</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div>
+          <label for="v-quien">Quién lo hizo *</label>
+          <input id="v-quien" type="text" placeholder="Nombre (ej. Palito-Jorge)" />
+        </div>
+        <div>
+          <label for="v-emp">Empresa / proveedor</label>
+          <input id="v-emp" type="text" placeholder="Cosmoplas, interno, camión…" value="${esc((pre && pre.proveedor) || "")}" />
+        </div>
+        <div class="full">
+          <label for="v-det">Trabajo realizado *</label>
+          <textarea id="v-det" rows="3" placeholder="Qué se hizo, piezas, observaciones"></textarea>
+        </div>
+        <div>
+          <label for="v-costo">Costo (CLP)</label>
+          <input id="v-costo" type="text" inputmode="numeric" placeholder="Opcional" />
+        </div>
+        <div>
+          <label for="v-prox">Próxima visita</label>
+          <input id="v-prox" type="date" />
+        </div>
+        <div>
+          <label for="v-estado">Estado</label>
+          <select id="v-estado">
+            <option value="terminada">Terminada</option>
+            <option value="por_hacer">Por hacerse</option>
+          </select>
+        </div>
+        ${cfg.conStock ? `
+        <div>
+          <label for="v-ins">Descontar de bodega</label>
+          <select id="v-ins">
+            <option value="">No descuenta stock</option>
+            ${(stockLista || []).map((it) => `<option value="${it.id}">${esc(it.nombre)} · hay ${window.textoCantidad ? window.textoCantidad(it.stock) : it.stock}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label for="v-cant">Cantidad</label>
+          <input id="v-cant" type="number" min="1" step="1" value="1" />
+        </div>` : ""}
+      </div>
+      <button class="btn btn-full btn-green" type="button" id="v-ok" style="margin-top:14px">Guardar visita</button>`;
+    modal.hidden = false;
+
+    const itemSel = modalBody.querySelector("#v-item");
+    const ficha = modalBody.querySelector("#v-ficha");
+    function syncFicha() {
+      if (itemSel.value === "") {
+        ficha.innerHTML = "<small>Elige el ítem al que corresponde esta visita.</small>";
+        return;
+      }
+      const i = Number(itemSel.value);
+      const row = cfg.rows[i];
+      if (!row) {
+        ficha.innerHTML = "<small>Elige el ítem al que corresponde esta visita.</small>";
+        return;
+      }
+      selected = i;
+      ficha.innerHTML =
+        "<b>" + esc(labelOf(row)) + "</b>" +
+        (row.ubicacion ? "<small>" + esc(row.ubicacion) + "</small>" : "") +
+        (row.proveedor ? "<small>Proveedor ficha: " + esc(row.proveedor) + "</small>" : "");
+      const emp = modalBody.querySelector("#v-emp");
+      if (emp && !emp.value.trim()) emp.value = row.proveedor || "";
+    }
+    itemSel.addEventListener("change", syncFicha);
+    syncFicha();
+
+    modalBody.querySelector("#v-ok").onclick = async () => {
+      const msg = modalBody.querySelector("#sel-label");
+      if (itemSel.value === "") {
+        msg.textContent = "Elige un ítem de la lista.";
+        if (window.cuadro) cuadro("Falta un dato", msg.textContent);
+        return;
+      }
+      const i = Number(itemSel.value);
+      const row = cfg.rows[i];
+      if (!row) {
+        msg.textContent = "Elige un ítem de la lista.";
+        if (window.cuadro) cuadro("Falta un dato", msg.textContent);
+        return;
+      }
+      seedVisitas(row, cfg.dateKey);
+      const fecha = isoToCl(modalBody.querySelector("#v-fecha").value);
+      const tipo = modalBody.querySelector("#v-tipo").value;
+      const quien = modalBody.querySelector("#v-quien").value.trim();
+      const empresa = modalBody.querySelector("#v-emp").value.trim();
+      const detalle = modalBody.querySelector("#v-det").value.trim();
+      const costo = modalBody.querySelector("#v-costo").value.trim();
+      const proxima = isoToCl(modalBody.querySelector("#v-prox").value);
+      const estado = (modalBody.querySelector("#v-estado") || {}).value || "terminada";
+      if (!fecha || !quien || !detalle) {
+        msg.textContent = "Faltan fecha, quién o el trabajo realizado.";
+        if (window.cuadro) cuadro("Falta un dato", msg.textContent);
+        return;
+      }
+      const visita = { fecha, tipo, quien, empresa, detalle, costo, proxima, estado };
+      let insumoId = null;
+      let cantidad = 0;
+      if (cfg.conStock) {
+        const selIns = modalBody.querySelector("#v-ins");
+        const cantInp = modalBody.querySelector("#v-cant");
+        if (selIns && selIns.value) {
+          insumoId = Number(selIns.value);
+          cantidad = Number(cantInp && cantInp.value);
+          const item = (stockLista || []).find((it) => it.id === insumoId);
+          if (!item) {
+            msg.textContent = "Ese insumo no está en la bodega.";
+            if (window.cuadro) cuadro("No se guardó", msg.textContent);
+            return;
+          }
+          if (!cantidad || cantidad <= 0) {
+            msg.textContent = "La cantidad tiene que ser mayor que cero.";
+            if (window.cuadro) cuadro("Falta un dato", msg.textContent);
+            return;
+          }
+          if (cantidad > item.stock) {
+            msg.textContent = "No alcanza " + item.nombre + ". Hay " + (window.textoCantidad ? window.textoCantidad(item.stock) : item.stock) + ".";
+            if (window.cuadro) cuadro("No se guardó", msg.textContent);
+            return;
+          }
+        }
+      }
+      const btn = modalBody.querySelector("#v-ok");
+      btn.disabled = true;
+      let visitaId = null;
+      try {
+        if (window.guardarVisita) visitaId = await window.guardarVisita(row, visita);
+        if (insumoId && window.moverStock) {
+          if (!visitaId) throw new Error("La visita no quedó en la base, así que el stock no se descuenta.");
+          await window.moverStock(insumoId, "salida", cantidad, {
+            visitaId,
+            nota: "Salida por " + labelOf(row)
+          });
+        }
+      } catch (err) {
+        msg.textContent = visitaId
+          ? "La visita quedó guardada, pero el stock no se descontó: " + (err.message || "error")
+          : (err.message || "No se pudo guardar la visita en la base.");
+        if (window.cuadro) cuadro("No se guardó", msg.textContent);
+        btn.disabled = false;
+        return;
+      }
+      row.visitas.push(visita);
+      applyUltima(row, cfg.dateKey);
+      saveMG();
+      selected = i;
+      closeModal();
+      paint();
+      if (cfg.conStock) refrescarStock();
+      if (window.cuadro) {
+        cuadro(
+          "Visita guardada",
+          estado === "por_hacer"
+            ? "Quedó por hacerse en " + labelOf(row) + "."
+            : "Quedó en el historial de " + labelOf(row) + "."
+        );
+      }
     };
   }
 
@@ -326,68 +535,22 @@ function catalogo(cfg) {
     const i = Number(tr.getAttribute("data-i"));
     if (btn) {
       ev.stopPropagation();
-      if (btn.getAttribute("data-act") === "detalle") openDetalle(cfg.rows[i]);
-      if (btn.getAttribute("data-act") === "edit") openEditar(i);
+      const act = btn.getAttribute("data-act");
+      if (act === "detalle") openDetalle(cfg.rows[i]);
+      if (act === "edit") openEditar(i);
       return;
     }
     selected = i;
-    const row = cfg.rows[i];
-    resetVisit();
-    main.querySelector("#sel-label").innerHTML = "Visita nueva. Completa lo marcado con *.";
-    main.querySelector("#v-ficha").innerHTML =
-      "<b>" + esc(labelOf(row)) + "</b>" +
-      (row.ubicacion ? "<small>" + esc(row.ubicacion) + "</small>" : "") +
-      (row.proveedor ? "<small>Proveedor ficha: " + esc(row.proveedor) + "</small>" : "");
-    main.querySelector("#v-emp").value = row.proveedor || "";
     paint();
   });
 
+  main.querySelector("#btn-visita").addEventListener("click", () => openVisita(selected));
   main.querySelector("#modal-x").addEventListener("click", closeModal);
   modal.addEventListener("click", (ev) => { if (ev.target === modal) closeModal(); });
-
-  function resetVisit() {
-    main.querySelector("#v-fecha").value = hoyISO();
-    main.querySelector("#v-tipo").value = "Revisión";
-    main.querySelector("#v-quien").value = "";
-    main.querySelector("#v-emp").value = "";
-    main.querySelector("#v-det").value = "";
-    main.querySelector("#v-costo").value = "";
-    main.querySelector("#v-prox").value = "";
-  }
-
-  main.querySelector("#v-ok").addEventListener("click", () => {
-    if (selected < 0) {
-      main.querySelector("#sel-label").textContent = "Primero elige una fila (sin usar Modificar).";
-      return;
-    }
-    const row = cfg.rows[selected];
-    seedVisitas(row, cfg.dateKey);
-    const fecha = isoToCl(main.querySelector("#v-fecha").value);
-    const tipo = main.querySelector("#v-tipo").value;
-    const quien = main.querySelector("#v-quien").value.trim();
-    const empresa = main.querySelector("#v-emp").value.trim();
-    const detalle = main.querySelector("#v-det").value.trim();
-    const costo = main.querySelector("#v-costo").value.trim();
-    const proxima = isoToCl(main.querySelector("#v-prox").value);
-    if (!fecha || !quien || !detalle) {
-      main.querySelector("#sel-label").textContent = "Faltan fecha, quién o el trabajo realizado.";
-      return;
-    }
-    row.visitas.push({ fecha, tipo, quien, empresa, detalle, costo, proxima });
-    applyUltima(row, cfg.dateKey);
-    saveMG();
-    const keepFicha = main.querySelector("#v-ficha").innerHTML;
-    resetVisit();
-    main.querySelector("#v-ficha").innerHTML = keepFicha;
-    main.querySelector("#v-emp").value = row.proveedor || "";
-    main.querySelector("#sel-label").innerHTML =
-      "Visita agregada a <b>" + esc(labelOf(row)) + "</b>. Quedó en Ver detalle.";
-    paint();
-  });
 
   q.addEventListener("input", paint);
   if (f) f.addEventListener("change", paint);
   ord.addEventListener("change", paint);
-  resetVisit();
   paint();
+  if (cfg.conStock) refrescarStock();
 }

@@ -14,6 +14,7 @@ CREATE TYPE pilar             AS ENUM ('MG', 'ME', 'RE');
 CREATE TYPE tipo_zona         AS ENUM ('edificio', 'cabana', 'habitacion', 'exterior', 'recinto');
 CREATE TYPE grupo_categoria   AS ENUM ('Equipos', 'Predio', 'Habitaciones', 'Urgencias');
 CREATE TYPE tipo_trabajador   AS ENUM ('interno', 'externo');
+CREATE TYPE clase_entrega     AS ENUM ('epp', 'ropa');
 CREATE TYPE tipo_tarea        AS ENUM ('faena_jardin', 'riego', 'prevencion', 'plan_anual', 'hito_obra', 'recurrente');
 CREATE TYPE estado_tarea      AS ENUM ('planificada', 'en_curso', 'por_cerrar', 'pendiente', 'atrasada', 'hecha', 'cancelada');
 CREATE TYPE temporada         AS ENUM ('invierno', 'verano', 'ambas');
@@ -36,7 +37,8 @@ CREATE TABLE usuario (
   id            SERIAL PRIMARY KEY,
   nombre        VARCHAR(120) NOT NULL,
   correo        VARCHAR(160) NOT NULL UNIQUE,
-  clave_hash    VARCHAR(255) NOT NULL,
+  login         VARCHAR(60),                     -- ej. andres.cordero
+  clave_hash    VARCHAR(255) NOT NULL,           -- bcrypt (pgcrypto)
   rol           rol_usuario  NOT NULL DEFAULT 'mantencion',
   activo        BOOLEAN      NOT NULL DEFAULT TRUE,
   creado_en     TIMESTAMP    NOT NULL DEFAULT NOW()
@@ -74,6 +76,32 @@ CREATE TABLE trabajador (
   proveedor_id  INT REFERENCES proveedor(id),  -- si es externo
   activo        BOOLEAN NOT NULL DEFAULT TRUE,
   UNIQUE (nombre, proveedor_id)
+);
+
+CREATE TABLE entrega (
+  id             SERIAL PRIMARY KEY,
+  trabajador_id  INT NOT NULL REFERENCES trabajador(id),
+  clase          clase_entrega NOT NULL,
+  item           VARCHAR(120) NOT NULL,
+  fecha          DATE NOT NULL,
+  cantidad       INT NOT NULL DEFAULT 1 CHECK (cantidad > 0),
+  nota           VARCHAR(300)
+);
+
+CREATE TABLE charla (
+  id             SERIAL PRIMARY KEY,
+  trabajador_id  INT NOT NULL REFERENCES trabajador(id),
+  fecha          DATE NOT NULL,
+  tema           VARCHAR(160) NOT NULL,
+  asistio        BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE archivo_trabajador (
+  id             SERIAL PRIMARY KEY,
+  trabajador_id  INT NOT NULL REFERENCES trabajador(id),
+  nombre         VARCHAR(160) NOT NULL,
+  ruta           VARCHAR(300) NOT NULL,
+  creado_en      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE tipo_trabajo (
@@ -145,6 +173,7 @@ CREATE TABLE idea_mejora (
   titulo         VARCHAR(160) NOT NULL,
   area           area_mejora  NOT NULL,
   propuesta_por  INT REFERENCES trabajador(id),
+  proponente     VARCHAR(120),                    -- texto libre (prototipo)
   estado         estado_idea  NOT NULL DEFAULT 'idea',
   pasa_a         VARCHAR(80),                     -- Valorizar, Cotizar, Plan anual jardín…
   fecha          DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -230,6 +259,7 @@ CREATE TABLE insumo (
 CREATE TABLE visita (
   id              SERIAL PRIMARY KEY,
   fecha           DATE NOT NULL,
+  estado          TEXT NOT NULL DEFAULT 'terminada', -- por_hacer | terminada
   activo_id       INT REFERENCES activo(id),
   componente_id   INT REFERENCES componente(id),
   tarea_id        INT REFERENCES tarea(id),
@@ -435,9 +465,47 @@ INSERT INTO zona (codigo, nombre, tipo) VALUES
   ('luna',    'Cabaña Luna',       'cabana');
 
 INSERT INTO zona (codigo, nombre, tipo, piso)
-SELECT n::text, 'Habitación ' || n, 'habitacion', (n / 100)
+SELECT n::text, 'Habitación ' || n, 'habitacion'::tipo_zona, (n / 100)::smallint
 FROM generate_series(101, 108) n
-UNION ALL SELECT n::text, 'Habitación ' || n, 'habitacion', (n / 100) FROM generate_series(201, 208) n
-UNION ALL SELECT n::text, 'Habitación ' || n, 'habitacion', (n / 100) FROM generate_series(301, 308) n;
+UNION ALL SELECT n::text, 'Habitación ' || n, 'habitacion'::tipo_zona, (n / 100)::smallint FROM generate_series(201, 208) n
+UNION ALL SELECT n::text, 'Habitación ' || n, 'habitacion'::tipo_zona, (n / 100)::smallint FROM generate_series(301, 308) n;
+
+CREATE OR REPLACE FUNCTION public.compra_anulado_fijo()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF OLD.estado = 'anulado' AND NEW.estado IS DISTINCT FROM OLD.estado THEN
+    RAISE EXCEPTION 'Una compra anulada no se puede cambiar de estado';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS compra_anulado_fijo ON public.compra;
+CREATE TRIGGER compra_anulado_fijo
+  BEFORE UPDATE ON public.compra
+  FOR EACH ROW
+  EXECUTE FUNCTION public.compra_anulado_fijo();
+
+INSERT INTO tarea (pilar, tipo, codigo, nombre, fecha_inicio, fecha_fin, estado, mostrar_gantt)
+SELECT v.pilar::pilar, 'recurrente'::tipo_tarea, v.codigo, v.nombre, v.ini::date, v.fin::date, v.estado::estado_tarea, true
+FROM (VALUES
+  ('ME', 'gantt:sellado', 'Sellado ventanas piso 2', '2026-04-01', '2026-04-20', 'hecha'),
+  ('MG', 'gantt:radiadores', 'Radiadores hotel (presión de agua)', '2026-03-16', '2026-03-16', 'hecha'),
+  ('MG', 'gantt:graseras', 'Graseras / planta de tratamiento', '2026-04-01', '2026-04-01', 'hecha'),
+  ('ME', 'gantt:poda', 'Poda de altura del predio', '2026-07-01', '2026-07-15', 'hecha'),
+  ('RE', 'gantt:h107', 'Hab. 107 — tapa WC', '2026-09-22', '2026-09-23', 'hecha'),
+  ('ME', 'gantt:reja', 'Pintar reja de acceso', '2026-10-04', '2026-10-06', 'atrasada'),
+  ('RE', 'gantt:h201', 'Hab. 201 — pintura', '2026-10-01', '2026-10-06', 'por_cerrar'),
+  ('MG', 'gantt:caldera', 'Caldera ACV (visita externa)', '2026-10-12', '2026-10-12', 'planificada'),
+  ('ME', 'gantt:techos', 'Mantención techos hotel', '2026-10-15', '2026-10-31', 'en_curso'),
+  ('MG', 'gantt:agua', 'Tratamiento agua potable', '2026-10-01', '2026-10-31', 'en_curso')
+) AS v(pilar, codigo, nombre, ini, fin, estado)
+WHERE NOT EXISTS (SELECT 1 FROM tarea t WHERE t.codigo = v.codigo);
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('trabajadores', 'trabajadores', true)
+ON CONFLICT (id) DO NOTHING;
 
 COMMIT;

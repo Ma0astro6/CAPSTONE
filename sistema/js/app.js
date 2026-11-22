@@ -11,32 +11,297 @@ const LOGO = `
   <text x="110" y="78" text-anchor="middle" font-family="Calibri, sans-serif" font-size="12" fill="#111">ecohotel</text>
 </svg>`;
 
-function headerHTML(rol, crumbs) {
-  const who = rol === "user"
-    ? "<b>Equipo mantención</b>Usuario"
-    : "<b>Andrés Cordero</b>Administrador";
-  const back = crumbs && crumbs.length > 1
-    ? `<a class="btn btn-back" href="${crumbs[crumbs.length - 2].href}">← Regresar</a>`
+function getSesion() {
+  try {
+    return JSON.parse(sessionStorage.getItem("SESION") || "null");
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearSesion() {
+  sessionStorage.removeItem("SESION");
+  sessionStorage.removeItem("rol");
+  sessionStorage.removeItem("PERMISOS");
+  sessionStorage.removeItem("INICIO_BOTONES");
+  sessionStorage.removeItem("AVISO_ENTRADA");
+}
+
+function rolLabel(rol, nombre) {
+  if (nombre) return nombre;
+  const map = {
+    admin: "Administrador",
+    prevencion: "Prevencionista",
+    mantencion: "Mantención",
+    usuario: "Usuario"
+  };
+  return map[rol] || "Usuario";
+}
+
+function headerHTML(sesion, crumbs) {
+  const nombre = (sesion && sesion.nombre) || "Usuario";
+  const cargo = rolLabel(sesion && sesion.rol, sesion && sesion.rol_nombre);
+  const who = `<b>${nombre}</b><span>${cargo}</span>`;
+  const salir = location.pathname.includes("/vistas/") ? "../index.html" : "index.html";
+  const admin = sesion && sesion.rol === "admin"
+    ? `<a href="usuarios.html">Usuarios</a>
+       <a href="vista-usuario.html">Permisos</a>`
     : "";
   return `
     <header class="topbar">
       <div class="logo-wrap">${LOGO}</div>
-      <div class="brand-line"><small>Obras · Mantención · Mejora</small></div>
-      ${back}
-      <div class="spacer"></div>
       <div class="who">${who}</div>
-      <a class="btn" href="../index.html">Salir</a>
+      <div class="spacer"></div>
+      <div class="menu-cuenta">
+        <button type="button" class="menu-barras" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="menu-panel" hidden>
+          ${admin}
+          <a class="salir" href="${salir}" onclick="clearSesion()">Salir</a>
+        </div>
+      </div>
     </header>`;
 }
 
+const PAGINA_MENU = {
+  "mantencion.html": "mg",
+  "calendario.html": "mg",
+  "mejoras.html": "me",
+  "remodelaciones.html": "re",
+  "gantt.html": "gantt",
+  "reactivas.html": "reactivas",
+  "equipos-crear.html": "equipos",
+  "equipos-buscar.html": "equipos",
+  "maquinas.html": "equipos",
+  "radiadores.html": "equipos",
+  "refrigeradores.html": "equipos",
+  "predio-crear.html": "predio",
+  "predio-buscar.html": "predio",
+  "fosas.html": "predio",
+  "bodegas.html": "predio",
+  "jardin.html": "predio",
+  "habitaciones-crear.html": "habitaciones",
+  "habitaciones-buscar.html": "habitaciones",
+  "banos.html": "habitaciones",
+  "tvs.html": "habitaciones",
+  "puertas.html": "habitaciones",
+  "pilas.html": "habitaciones",
+  "prevencion.html": "prevencion",
+  "prevencion-crear.html": "prevencion",
+  "prevencion-buscar.html": "prevencion",
+  "prevencion-plan.html": "prevencion",
+  "trabajadores.html": "prevencion",
+  "proveedores.html": "proveedores",
+  "bodega-insumos.html": "bodega",
+  "zona.html": "re",
+  "usuarios.html": "admin",
+  "vista-usuario.html": "admin"
+};
+
+function permisosDeSesion() {
+  try {
+    return JSON.parse(sessionStorage.getItem("PERMISOS") || "null");
+  } catch (e) {
+    return null;
+  }
+}
+
+const BOTONES_INICIO = [
+  { codigo: "mg", titulo: "Mantención general", texto: "Las planillas de Andrés: buscar, filtrar y registrar visita", href: "mantencion.html", clase: "t-man", marca: "MG" },
+  { codigo: "me", titulo: "Mejoras", texto: "Por hacer, plan anual y proyectos valorizados", href: "mejoras.html", clase: "t-mej", marca: "ME" },
+  { codigo: "re", titulo: "Remodelaciones", texto: "Zonas del predio, compras, proveedores y Gantt", href: "remodelaciones.html", clase: "t-rem", marca: "RE" },
+  { codigo: "bodega", titulo: "Bodega", texto: "Inventario de insumos", href: "bodega-insumos.html", clase: "t-bod", marca: "" },
+  { codigo: "gantt", titulo: "Carta Gantt", texto: "Lo que pasa en el año", href: "gantt.html", clase: "t-mej", marca: "ME" },
+  { codigo: "reactivas", titulo: "Reactivas", texto: "Avisos urgentes de recepción o huésped", href: "reactivas.html", clase: "t-rea", marca: "MG" },
+  { codigo: "calendario", titulo: "Calendario", texto: "Lo que se acerca en equipos y predio", href: "calendario.html", clase: "t-man", marca: "MG" },
+  { codigo: "proveedores", titulo: "Proveedores", texto: "Quién suministra", href: "proveedores.html", clase: "t-rem", marca: "RE" },
+  { codigo: "prevencion", titulo: "Prevención", texto: "Protocolos y capacitaciones", href: "prevencion.html", clase: "t-mej", marca: "MG" },
+  { codigo: "plan_prev", titulo: "Plan del año", texto: "Carta de prevención, de enero a diciembre", href: "prevencion-plan.html", clase: "t-mej", marca: "MG" },
+  { codigo: "crear_eq", titulo: "Generar mantención", texto: "Anotar una mantención de un equipo", href: "equipos-crear.html", clase: "t-man", marca: "MG", accion: true },
+  { codigo: "buscar_eq", titulo: "Buscar equipo", texto: "Encontrar una máquina y ver su historial", href: "equipos-buscar.html", clase: "t-man", marca: "MG", accion: true },
+  { codigo: "crear_predio", titulo: "Generar trabajo de predio", texto: "Anotar un trabajo del predio", href: "predio-crear.html", clase: "t-man", marca: "MG", accion: true },
+  { codigo: "buscar_predio", titulo: "Buscar en el predio", texto: "Encontrar una fosa, una bodega o una faena", href: "predio-buscar.html", clase: "t-man", marca: "MG", accion: true },
+  { codigo: "crear_hab", titulo: "Generar mantención de pieza", texto: "Anotar una mantención de habitación", href: "habitaciones-crear.html", clase: "t-man", marca: "MG", accion: true },
+  { codigo: "crear_prev", titulo: "Registrar avance de prevención", texto: "Anotar un avance de un protocolo o una capacitación", href: "prevencion-crear.html", clase: "t-mej", marca: "MG", accion: true },
+  { codigo: "buscar_prev", titulo: "Buscar tarea de prevención", texto: "Encontrar un protocolo o una capacitación", href: "prevencion-buscar.html", clase: "t-mej", marca: "MG", accion: true }
+];
+
+function escHtml(val) {
+  return String(val == null ? "" : val)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/"/g, "&quot;");
+}
+
+const PADRE_MENU = {
+  reactivas: "mg",
+  equipos: "mg",
+  predio: "mg",
+  habitaciones: "mg",
+  proveedores: "re",
+  bodega: "re"
+};
+
+function botonInicio(codigo) {
+  return BOTONES_INICIO.find((b) => b.codigo === codigo) || null;
+}
+
+function permisoDeBoton(codigo) {
+  const boton = botonInicio(codigo);
+  if (!boton) return "";
+  return PAGINA_MENU[boton.href] || "";
+}
+
+function botonPermitido(codigo) {
+  const op = permisoDeBoton(codigo);
+  if (!op) return false;
+  if (!opcionVisible(op)) return false;
+  const padre = PADRE_MENU[op];
+  return !padre || opcionVisible(padre);
+}
+
+function botonesAsignados() {
+  try {
+    return JSON.parse(sessionStorage.getItem("INICIO_BOTONES") || "null");
+  } catch (e) {
+    return null;
+  }
+}
+
+function opcionVisible(codigo) {
+  const sesion = getSesion();
+  if (!sesion) return true;
+  const map = permisosDeSesion();
+  if (!map || !Object.prototype.hasOwnProperty.call(map, codigo)) return true;
+  return map[codigo] !== false;
+}
+
+function paginaActual() {
+  const parts = location.pathname.split("/");
+  return decodeURIComponent(parts[parts.length - 1] || "");
+}
+
+function puedeVerPagina() {
+  const op = PAGINA_MENU[paginaActual()];
+  if (!op) return true;
+  if (op === "admin") return !!(getSesion() && getSesion().rol === "admin");
+  if (!opcionVisible(op)) return false;
+  const padre = PADRE_MENU[op];
+  return !padre || opcionVisible(padre);
+}
+
+function htmlBotonInicio(codigo, ancho) {
+  const boton = botonInicio(codigo);
+  if (!boton) return "";
+  const titulo = escHtml(boton.titulo);
+  const texto = escHtml(boton.texto);
+  if (ancho) {
+    return `<a class="tile tile-bodega" href="${boton.href}"><h3>${titulo}</h3><p>${texto}</p></a>`;
+  }
+  const marca = boton.marca ? `<span class="code">${escHtml(boton.marca)}</span>` : "";
+  return `<a class="tile ${boton.clase}" href="${boton.href}"><h3>${titulo}</h3><p>${texto}</p>${marca}</a>`;
+}
+
+async function pintarBotonesInicio() {
+  const grid = document.querySelector("main .grid-3");
+  if (!grid) return;
+  const sesion = getSesion();
+  if (!sesion || !sesion.rol || !window.db) return;
+  let filas = botonesAsignados();
+  if (!filas) {
+    const { data, error } = await db.from("inicio_boton").select("puesto, codigo").eq("rol_codigo", sesion.rol);
+    if (error) return;
+    filas = data || [];
+    sessionStorage.setItem("INICIO_BOTONES", JSON.stringify(filas));
+  }
+  if (!filas.length) return;
+  const porPuesto = {};
+  filas.forEach((fila) => {
+    if (botonPermitido(fila.codigo)) porPuesto[fila.puesto] = fila.codigo;
+  });
+  const cuadros = [1, 2, 3].map((puesto) => porPuesto[puesto]).filter(Boolean);
+  grid.classList.toggle("cols-1", cuadros.length === 1);
+  grid.classList.toggle("cols-2", cuadros.length === 2);
+  grid.innerHTML = cuadros.map((codigo) => htmlBotonInicio(codigo, false)).join("");
+  const barra = document.querySelector("main > a.tile-bodega");
+  if (porPuesto[4]) {
+    const html = htmlBotonInicio(porPuesto[4], true);
+    if (barra) barra.outerHTML = html;
+    else grid.insertAdjacentHTML("afterend", html);
+  } else if (barra) {
+    barra.remove();
+  }
+  aplicarMenus();
+}
+
+function aplicarMenus() {
+  document.querySelectorAll("[data-menu]").forEach((el) => {
+    const codigo = el.getAttribute("data-menu");
+    el.hidden = !opcionVisible(codigo);
+  });
+}
+
+async function guardarPermisos(rol) {
+  if (!rol || !window.db) {
+    sessionStorage.removeItem("PERMISOS");
+    return;
+  }
+  const { data, error } = await db.from("permiso_menu").select("opcion, visible").eq("rol_codigo", rol);
+  if (error) {
+    sessionStorage.removeItem("PERMISOS");
+    return;
+  }
+  const map = {};
+  (data || []).forEach((row) => { map[row.opcion] = !!row.visible; });
+  sessionStorage.setItem("PERMISOS", JSON.stringify(map));
+  const botones = await db.from("inicio_boton").select("puesto, codigo").eq("rol_codigo", rol);
+  if (!botones.error) sessionStorage.setItem("INICIO_BOTONES", JSON.stringify(botones.data || []));
+}
+
+function puedeAbrirHref(href) {
+  if (!href) return false;
+  const page = String(href).split("?")[0].split("/").pop();
+  if (!page || page === "inicio.html") return true;
+  const op = PAGINA_MENU[page];
+  if (!op) return true;
+  if (op === "admin") return !!(getSesion() && getSesion().rol === "admin");
+  if (!opcionVisible(op)) return false;
+  const padre = PADRE_MENU[op];
+  return !padre || opcionVisible(padre);
+}
+
 function crumbHTML(items) {
-  const back = items && items.length > 1
-    ? `<a class="btn btn-back" href="${items[items.length - 2].href}">← Regresar</a>`
+  const lista = items || [];
+  const visibles = lista.filter((x, i) => i === lista.length - 1 || puedeAbrirHref(x.href));
+  const backHref = visibles.length > 1 ? visibles[visibles.length - 2].href : "";
+  const back = backHref
+    ? `<a class="btn btn-back" href="${backHref}" data-regresar="1">← Regresar</a>`
     : "";
-  const trail = items.map((x, i) =>
-    i === items.length - 1 ? x.label : `<a href="${x.href}">${x.label}</a> ▸ `
+  const trail = visibles.map((x, i) =>
+    i === visibles.length - 1 ? x.label : `<a href="${x.href}">${x.label}</a> ▸ `
   ).join("");
   return `<nav class="crumb">${back}<span class="crumb-trail">${trail}</span></nav>`;
+}
+
+function bindRegresar() {
+  const a = document.querySelector("[data-regresar]");
+  if (!a) return;
+  a.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    const fallback = a.getAttribute("href") || "inicio.html";
+    try {
+      if (document.referrer) {
+        const u = new URL(document.referrer);
+        const page = decodeURIComponent((u.pathname.split("/").pop() || "").split("?")[0]);
+        if (u.origin === location.origin && page && page !== paginaActual() && puedeAbrirHref(page) && u.pathname.includes("/vistas/")) {
+          location.href = page + u.search;
+          return;
+        }
+      }
+    } catch (e) {}
+    location.href = fallback;
+  });
 }
 
 function hoyISO() {
@@ -64,10 +329,25 @@ function saveCierre(map) {
   sessionStorage.setItem("CIERRE_DIA", JSON.stringify(map));
 }
 
+function originalGantt() {
+  if (typeof GANTT_OBRAS === "undefined") return [];
+  if (!window.GANTT_ORIGINAL) window.GANTT_ORIGINAL = GANTT_OBRAS.map((it) => ({ ...it }));
+  return window.GANTT_ORIGINAL;
+}
+
 function applyCierreToGantt() {
   if (typeof GANTT_OBRAS === "undefined") return;
+  const orig = {};
+  originalGantt().forEach((it) => { orig[it.id] = it; });
   const map = loadCierre();
   GANTT_OBRAS.forEach((it) => {
+    const base = orig[it.id];
+    if (base) {
+      it.estado = base.estado;
+      it.ini = base.ini;
+      it.fin = base.fin;
+      it.notaCierre = "";
+    }
     const c = map[it.id];
     if (!c) return;
     if (c.estado === "Hecho") it.estado = "Hecho";
@@ -77,6 +357,81 @@ function applyCierreToGantt() {
     }
     if (c.nota) it.notaCierre = c.nota;
   });
+}
+
+async function cargarCierres() {
+  if (!window.db || typeof GANTT_OBRAS === "undefined") return;
+  const tareas = await window.db.from("tarea").select("id, codigo").like("codigo", "gantt:%");
+  if (tareas.error) throw new Error(tareas.error.message);
+  const filas = tareas.data || [];
+  if (!filas.length) {
+    saveCierre({});
+    return;
+  }
+  const cierres = await window.db.from("cierre_tarea")
+    .select("tarea_id, fecha, resultado, fecha_retoma, nota, creado_en")
+    .in("tarea_id", filas.map((t) => t.id))
+    .order("creado_en", { ascending: false });
+  if (cierres.error) throw new Error(cierres.error.message);
+  const ultimo = {};
+  (cierres.data || []).forEach((c) => { if (!ultimo[c.tarea_id]) ultimo[c.tarea_id] = c; });
+  const map = {};
+  filas.forEach((t) => {
+    const c = ultimo[t.id];
+    if (!c || !t.codigo || t.codigo.indexOf("gantt:") !== 0) return;
+    map[t.codigo.slice(6)] = {
+      estado: c.resultado === "hecho" ? "Hecho" : "Pendiente",
+      fecha: c.fecha,
+      nota: c.nota || "",
+      proxima: c.fecha_retoma || ""
+    };
+  });
+  saveCierre(map);
+}
+
+async function registrarCierre(id, estado, extra) {
+  const it = typeof GANTT_OBRAS !== "undefined" ? GANTT_OBRAS.find((x) => x.id === id) : null;
+  const ses = getSesion();
+  if (!it || !window.db || !ses || !ses.id) {
+    if (window.cuadro) cuadro("No se guardó", "No hay sesión o la tarea no está en la carta.");
+    return;
+  }
+  const base = originalGantt().find((x) => x.id === id) || it;
+  const resultado = estado === "Hecho" ? "hecho" : "pendiente";
+  const proxima = (extra && extra.proxima) || "";
+  const nota = ((extra && extra.nota) || "").slice(0, 300);
+  try {
+    const buscada = await window.db.from("tarea").select("id").eq("codigo", "gantt:" + id).maybeSingle();
+    if (buscada.error) throw new Error(buscada.error.message);
+    if (!buscada.data) throw new Error("Esa barra todavía no tiene tarea en la base.");
+    const tareaId = buscada.data.id;
+    const ins = await window.db.from("cierre_tarea").insert({
+      tarea_id: tareaId,
+      fecha: hoyISO(),
+      resultado,
+      fecha_retoma: resultado === "pendiente" ? (proxima || isoMasDias(hoyISO(), 1)) : null,
+      nota: nota || null,
+      usuario_id: ses.id
+    });
+    if (ins.error) throw new Error(ins.error.message);
+    const up = await window.db.from("tarea").update({
+      estado: resultado === "hecho" ? "hecha" : "pendiente",
+      fecha_fin: resultado === "pendiente" ? (proxima || isoMasDias(hoyISO(), 1)) : base.fin
+    }).eq("id", tareaId);
+    if (up.error) throw new Error(up.error.message);
+    const map = loadCierre();
+    map[id] = { estado, fecha: hoyISO(), nota, proxima: resultado === "pendiente" ? (proxima || isoMasDias(hoyISO(), 1)) : "" };
+    saveCierre(map);
+    if (window.cuadro) {
+      cuadro(
+        estado === "Hecho" ? "Quedó hecho" : "Quedó pendiente",
+        it.nom + (estado === "Hecho" ? " se guardó como hecho." : " se retoma el " + (map[id].proxima) + ".")
+      );
+    }
+    renderAgenda();
+  } catch (err) {
+    if (window.cuadro) cuadro("No se guardó", err.message || "No se pudo guardar el cierre.");
+  }
 }
 
 function necesitaCierre(it, hoy) {
@@ -116,24 +471,38 @@ function calTarjetas(hoy) {
 
 function pizarraHTML() {
   const hoy = hoyISO();
-  const dias = calTarjetas(hoy);
-  const etiqueta = new Date(hoy + "T12:00:00").toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" });
+  const base = new Date(hoy + "T12:00:00");
+  const pad = (n) => String(n).padStart(2, "0");
+  const dias = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    dias.push({
+      iso: d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()),
+      dia: d.getDate(),
+      dow: d.toLocaleDateString("es-CL", { weekday: "short" }).replace(".", ""),
+      hoy: i === 0
+    });
+  }
+  const desde = dias[0].dia;
+  const hasta = dias[6].dia;
   return `
-    <section class="pizarra" aria-label="Calendario: lo que viene">
+    <section class="pizarra" aria-label="Próximos 7 días">
       <div class="agenda-head">
-        <p class="pizarra-titulo">Calendario</p>
-        <span class="agenda-rango">Hoy ${etiqueta} · lo abierto y lo que viene</span>
+        <p class="pizarra-titulo">Próximos 7 días</p>
+        <span class="agenda-rango">Del ${desde} al ${hasta} · si hay algo de por medio</span>
       </div>
-      <div class="posits">
-        ${dias.map((p) => `
-          <a class="posit ${p.color}" href="${p.href}">
-            <span class="cal-date"><b>${p.dia}</b>${p.dow}</span>
-            <span class="cuando">${p.cuando}</span>
-            <p>${p.nom}${p.notaCierre ? " · " + p.notaCierre : ""}</p>
-          </a>`).join("")}
+      <div class="semana">
+        ${dias.map((d) => `
+          <div class="semana-dia${d.hoy ? " hoy" : ""}" data-dia="${d.iso}">
+            <span class="cal-date"><b>${d.dia}</b>${d.dow}</span>
+            <p class="semana-vacio">Libre</p>
+          </div>`).join("")}
       </div>
     </section>`;
 }
+
+let cierreAbierto = false;
 
 function cierreHTML() {
   const hoy = hoyISO();
@@ -147,11 +516,17 @@ function cierreHTML() {
       const it = obras.find((x) => x.id === id) || { nom: id };
       return { ...it, ...map[id] };
     });
+  const n = abiertas.length;
   return `
-    <section class="cierre-board" aria-label="Cierre del día">
-      <div class="agenda-head">
+    <section class="cierre-board${cierreAbierto ? " abierto" : ""}" aria-label="Cierre del día">
+      <button type="button" class="cierre-toggle" aria-expanded="${cierreAbierto ? "true" : "false"}">
         <p class="pizarra-titulo">Cierre del día</p>
-      </div>
+        <span class="cierre-lado">
+          ${n ? `<span class="cierre-badge">${n}</span>` : `<span class="cierre-cero">Al día</span>`}
+          <span class="cierre-flecha" aria-hidden="true"></span>
+        </span>
+      </button>
+      <div class="cierre-cuerpo"${cierreAbierto ? "" : " hidden"}>
       ${abiertas.length ? `<div class="cierre-grid">${abiertas.map((it) => `
         <article class="cierre-card" data-id="${it.id}">
           <div>
@@ -166,6 +541,8 @@ function cierreHTML() {
           </div>
         </article>`).join("")}</div>` : ""}
       ${cerradasHoy.length ? `<p class="cierre-log">Marcadas hoy: ${cerradasHoy.map((c) => c.nom + " (" + c.estado.toLowerCase() + ")").join(" · ")}</p>` : ""}
+      ${n ? "" : `<p class="cierre-log">No queda nada por marcar.</p>`}
+      </div>
     </section>
     <div class="modal-bg" id="cierre-modal" hidden>
       <div class="modal-card" role="dialog" aria-modal="true">
@@ -214,10 +591,10 @@ function ganttHTML() {
     return { ...it, left, width, rango, color: colores[it.pilar] || "#2a6f8a" };
   });
   return `
-    <section class="gantt-board" aria-label="Carta Gantt">
+    <section class="gantt-board" aria-label="Carta Gantt" data-menu="gantt">
       <div class="agenda-head">
         <p class="pizarra-titulo">Carta Gantt</p>
-        <span class="agenda-rango">Año 2026 · la barra es el periodo · la línea oro es hoy · clic abre la ficha</span>
+        <span class="agenda-rango">Año 2026 · la barra es el periodo · la línea oro es hoy · clic muestra el detalle</span>
       </div>
       <div class="gantt-legend">
         <span><i style="background:#2a6f8a"></i> MG mantención</span>
@@ -227,7 +604,7 @@ function ganttHTML() {
       </div>
       <div class="gantt-axis"><span>Tarea</span><div>${meses.map((m) => `<i>${m}</i>`).join("")}</div></div>
       ${filas.map((f) => `
-        <a class="gantt-row gantt-link" href="${f.href}">
+        <button type="button" class="gantt-row gantt-link" data-gantt="${f.id}">
           <div class="gantt-lab">
             <b>${f.nom}</b>
             <small>${f.pilar} · ${f.rango}</small>
@@ -237,26 +614,75 @@ function ganttHTML() {
             <span class="gantt-hoy" style="left:${hoyPct}%"></span>
             <i style="left:${f.left}%;width:${f.width}%;background:${f.color}"></i>
           </div>
-        </a>`).join("")}
+        </button>`).join("")}
     </section>`;
 }
 
-function registrarCierre(id, estado, extra) {
-  const map = loadCierre();
-  map[id] = {
-    estado,
-    fecha: hoyISO(),
-    nota: (extra && extra.nota) || "",
-    proxima: (extra && extra.proxima) || ""
+function cartaAnioHTML(items, anio) {
+  const anioN = Number(anio);
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  const hoy = new Date();
+  const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+  const verHoy = hoy.getFullYear() === anioN;
+  const hoyPct = verHoy ? ganttYearPct(hoyIso) : -1;
+  const pct = (iso) => {
+    const y = Number(String(iso).slice(0, 4));
+    if (y < anioN) return 0;
+    if (y > anioN) return 100;
+    return ganttYearPct(iso);
   };
-  saveCierre(map);
-  renderAgenda();
+  const filas = (items || []).slice().sort((a, b) => String(a.ini).localeCompare(String(b.ini))).map((it) => {
+    let left = pct(it.ini);
+    let right = pct(it.fin);
+    if (right < left) right = left;
+    let width = Math.max(1.6, right - left);
+    if (it.ini === it.fin) width = 1.8;
+    const rango = it.ini === it.fin ? ganttFmt(it.ini) : ganttFmt(it.ini) + " – " + ganttFmt(it.fin);
+    return { ...it, left, width, rango };
+  });
+  if (!filas.length) {
+    return `<section class="gantt-board" aria-label="Plan del año"><div class="agenda-head"><p class="pizarra-titulo">Plan del año</p></div><p class="note">En ${anioN} no hay tareas de prevención con inicio y fin. Las que anotes en Crear aparecen acá.</p></section>`;
+  }
+  return `
+    <section class="gantt-board" aria-label="Plan del año">
+      <div class="agenda-head">
+        <p class="pizarra-titulo">Plan del año</p>
+        <span class="agenda-rango">Año ${anioN} · la barra es el periodo · clic muestra el detalle</span>
+      </div>
+      <div class="gantt-legend">
+        <span><i style="background:#2a6f8a"></i> Prevención</span>
+        ${verHoy ? `<span><i class="hoy-dot"></i> Hoy ${ganttFmt(hoyIso)}</span>` : ""}
+      </div>
+      <div class="gantt-axis"><span>Tarea</span><div>${meses.map((m) => `<i>${m}</i>`).join("")}</div></div>
+      ${filas.map((f) => `
+        <button type="button" class="gantt-row gantt-link" data-plan="${escTarea(f.id)}">
+          <div class="gantt-lab">
+            <b>${escTarea(f.nom)}</b>
+            <small>${escTarea(f.rango)}</small>
+            <em class="gantt-est ${f.estado === "Hecho" ? "ok" : (f.estado === "Atrasada" || f.estado === "Pendiente" ? "warn" : "")}">${escTarea(f.estado)}</em>
+          </div>
+          <div class="gantt-bar">
+            ${verHoy ? `<span class="gantt-hoy" style="left:${hoyPct}%"></span>` : ""}
+            <i style="left:${f.left}%;width:${f.width}%;background:#2a6f8a"></i>
+          </div>
+        </button>`).join("")}
+    </section>`;
 }
 
 function bindCierre() {
   const board = document.querySelector(".cierre-board");
   const modal = document.getElementById("cierre-modal");
   if (!board) return;
+  const toggle = board.querySelector(".cierre-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      cierreAbierto = !cierreAbierto;
+      const cuerpo = board.querySelector(".cierre-cuerpo");
+      board.classList.toggle("abierto", cierreAbierto);
+      if (cuerpo) cuerpo.hidden = !cierreAbierto;
+      toggle.setAttribute("aria-expanded", cierreAbierto ? "true" : "false");
+    });
+  }
   board.addEventListener("click", (ev) => {
     const btn = ev.target.closest("[data-cierre]");
     if (!btn) return;
@@ -286,40 +712,251 @@ function bindCierre() {
   };
 }
 
+function escTarea(val) {
+  return String(val == null ? "" : val)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/"/g, "&quot;");
+}
+
+function fechaLinda(iso) {
+  const s = String(iso || "");
+  if (!/^\d{4}-\d{2}-\d{2}/.test(s)) return s || "—";
+  const d = new Date(s.slice(0, 10) + "T12:00:00");
+  return d.toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function asegurarModalTarea() {
+  let modal = document.getElementById("tarea-modal");
+  if (modal) return modal;
+  modal = document.createElement("div");
+  modal.className = "modal-bg";
+  modal.id = "tarea-modal";
+  modal.hidden = true;
+  modal.innerHTML =
+    '<div class="modal-card" role="dialog" aria-modal="true">' +
+    '<div class="modal-head"><h3 id="tarea-titulo">Detalle</h3>' +
+    '<button class="btn btn-ghost" type="button" id="tarea-x">Cerrar</button></div>' +
+    '<div id="tarea-cuerpo"></div></div>';
+  document.body.appendChild(modal);
+  modal.querySelector("#tarea-x").onclick = () => { modal.hidden = true; };
+  modal.addEventListener("click", (ev) => { if (ev.target === modal) modal.hidden = true; });
+  return modal;
+}
+
+function mostrarDetalle(titulo, cuerpo) {
+  const modal = asegurarModalTarea();
+  modal.querySelector("#tarea-titulo").textContent = titulo;
+  modal.querySelector("#tarea-cuerpo").innerHTML = cuerpo;
+  modal.hidden = false;
+}
+
+function abrirDetalleGantt(id) {
+  if (typeof GANTT_OBRAS === "undefined") return;
+  applyCierreToGantt();
+  const it = GANTT_OBRAS.find((x) => x.id === id);
+  if (!it) return;
+  const area = { MG: "Mantención general", ME: "Mejoras", RE: "Remodelación" }[it.pilar] || it.pilar;
+  const rango = it.ini === it.fin ? fechaLinda(it.ini) : fechaLinda(it.ini) + " – " + fechaLinda(it.fin);
+  const cierre = loadCierre()[id];
+  mostrarDetalle(it.nom, `
+    <dl class="ficha-dl">
+      <div><dt>Área</dt><dd>${escTarea(area)}</dd></div>
+      <div><dt>Periodo</dt><dd>${escTarea(rango)}</dd></div>
+      <div><dt>Estado</dt><dd>${escTarea(it.estado || "—")}</dd></div>
+      ${cierre && cierre.nota ? `<div><dt>Cierre</dt><dd>${escTarea(cierre.nota)}</dd></div>` : ""}
+      ${cierre && cierre.proxima ? `<div><dt>Retoma</dt><dd>${escTarea(fechaLinda(cierre.proxima))}</dd></div>` : ""}
+    </dl>
+    <p class="muted-mini">Es la tarea de la carta. Acá ves el periodo y cómo va, sin abrir un formulario nuevo.</p>`);
+}
+
+function abrirDetalleAgenda(it) {
+  if (!it) return;
+  const visitas = (it.visitas || []).slice(0, 6);
+  const hist = visitas.length
+    ? `<h4 class="mini-h">Últimas visitas</h4>
+      <table class="data hist"><thead><tr><th>Fecha</th><th>Tipo</th><th>Quién</th><th>Trabajo</th></tr></thead><tbody>
+      ${visitas.map((v) => `<tr>
+        <td>${escTarea(fechaLinda(v.fecha))}</td>
+        <td>${escTarea(v.tipo || "—")}</td>
+        <td>${escTarea(v.quien || "—")}</td>
+        <td>${escTarea(v.detalle || "—")}</td>
+      </tr>`).join("")}
+      </tbody></table>`
+    : `<p class="muted-mini">Todavía no hay visitas anotadas para esta tarea.</p>`;
+  mostrarDetalle(it.nombre, `
+    <dl class="ficha-dl">
+      <div><dt>Grupo</dt><dd>${escTarea(it.grupo || "—")}${it.tipo ? " · " + escTarea(it.tipo) : ""}</dd></div>
+      <div><dt>Lugar</dt><dd>${escTarea(it.lugar || "—")}</dd></div>
+      <div><dt>${it.motivo === "por_hacer" ? "Por hacerse" : "Próxima visita"}</dt><dd>${escTarea(fechaLinda(it.fecha))}</dd></div>
+    </dl>
+    ${hist}`);
+}
+
+function bindDetalleTarea() {
+  if (document.body.dataset.detalleTarea) return;
+  document.body.dataset.detalleTarea = "1";
+  document.addEventListener("click", (ev) => {
+    const gantt = ev.target.closest("[data-gantt]");
+    if (gantt) {
+      ev.preventDefault();
+      abrirDetalleGantt(gantt.getAttribute("data-gantt"));
+      return;
+    }
+    const plan = ev.target.closest("[data-plan]");
+    if (plan) {
+      ev.preventDefault();
+      const it = window.PLAN_PREV && window.PLAN_PREV[plan.getAttribute("data-plan")];
+      if (!it) return;
+      const rango = it.ini === it.fin ? fechaLinda(it.ini) : fechaLinda(it.ini) + " – " + fechaLinda(it.fin);
+      mostrarDetalle(it.nom, `
+        <dl class="ficha-dl">
+          <div><dt>Periodo</dt><dd>${escTarea(rango)}</dd></div>
+          <div><dt>Estado</dt><dd>${escTarea(it.estado || "—")}</dd></div>
+          <div><dt>Quién</dt><dd>${escTarea(it.quien || "—")}</dd></div>
+        </dl>
+        <p class="muted-mini"><a href="prevencion.html">Abrir la lista de prevención</a></p>`);
+      return;
+    }
+    const agenda = ev.target.closest("[data-agenda]");
+    if (!agenda) return;
+    ev.preventDefault();
+    const clave = agenda.getAttribute("data-agenda");
+    const it = window.DETALLE_TAREA && window.DETALLE_TAREA[clave];
+    abrirDetalleAgenda(it);
+  });
+}
+
 function renderAgenda() {
   const host = document.getElementById("agenda-host");
   if (!host) return;
   applyCierreToGantt();
   host.innerHTML = pizarraHTML() + cierreHTML() + ganttHTML();
   bindCierre();
+  if (typeof aplicarMenus === "function") aplicarMenus();
+}
+
+function bindMenu() {
+  const btn = document.querySelector(".menu-barras");
+  const panel = document.querySelector(".menu-panel");
+  if (!btn || !panel) return;
+  btn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    const abrir = panel.hidden;
+    panel.hidden = !abrir;
+    btn.setAttribute("aria-expanded", abrir ? "true" : "false");
+  });
+  panel.addEventListener("click", (ev) => ev.stopPropagation());
+  document.addEventListener("click", () => {
+    panel.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+  });
 }
 
 function mount(crumbs, opts) {
-  const rol = sessionStorage.getItem("rol") || "admin";
   const host = document.getElementById("shell");
   if (!host) return;
+  const sesion = getSesion();
+  if (!sesion || !sesion.id) {
+    const dest = location.pathname.includes("/vistas/") ? "../index.html" : "index.html";
+    window.location.href = dest;
+    return;
+  }
+  if (!puedeVerPagina()) {
+    window.location.href = "inicio.html";
+    return;
+  }
   applyCierreToGantt();
-  host.insertAdjacentHTML("afterbegin", headerHTML(rol, crumbs) + crumbHTML(crumbs));
+  host.insertAdjacentHTML("afterbegin", headerHTML(sesion, crumbs) + crumbHTML(crumbs));
+  bindMenu();
+  bindRegresar();
+  bindDetalleTarea();
   if (opts && opts.agenda) {
     host.insertAdjacentHTML("beforeend", '<div id="agenda-host"></div>');
     renderAgenda();
+    cargarCierres().then(() => renderAgenda()).catch((err) => {
+      if (window.cuadro) cuadro("No se leyeron los cierres", err.message || "La base no respondió.");
+    });
   }
+  aplicarMenus();
 }
 
-function login(rol) {
+async function login() {
   const u = document.getElementById("u");
   const p = document.getElementById("p");
+  const err = document.getElementById("err");
+  const btn = document.getElementById("btn-login");
+  err.textContent = "";
   if (!u.value.trim() || !p.value.trim()) {
-    document.getElementById("err").textContent = "Correo/usuario y contraseña son obligatorios.";
+    err.textContent = "Usuario y contraseña son obligatorios.";
     return;
   }
-  sessionStorage.setItem("rol", rol);
-  window.location.href = "vistas/inicio.html";
+  if (!window.db) {
+    err.textContent = "No hay conexión a la base de datos.";
+    return;
+  }
+  const carga = document.getElementById("carga");
+  const t0 = Date.now();
+  if (carga) carga.hidden = false;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Validando…";
+  }
+  const soltar = () => {
+    if (carga) carga.hidden = true;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Iniciar sesión";
+    }
+  };
+  try {
+    const { data, error } = await db.rpc("login_usuario", {
+      p_login: u.value.trim(),
+      p_clave: p.value
+    });
+    if (error) {
+      err.textContent = error.message;
+      soltar();
+      return;
+    }
+    const res = typeof data === "string" ? JSON.parse(data) : data;
+    if (!res || !res.ok) {
+      err.textContent = (res && res.error) || "Usuario o contraseña incorrectos.";
+      soltar();
+      return;
+    }
+    sessionStorage.setItem("SESION", JSON.stringify({
+      id: res.id,
+      nombre: res.nombre,
+      correo: res.correo,
+      login: res.login,
+      rol: res.rol,
+      rol_nombre: res.rol_nombre || ""
+    }));
+    sessionStorage.setItem("rol", res.rol === "admin" ? "admin" : "user");
+    await guardarPermisos(res.rol);
+    sessionStorage.setItem("AVISO_ENTRADA", "1");
+    const espera = 2600 - (Date.now() - t0);
+    if (espera > 0) await new Promise((r) => setTimeout(r, espera));
+    window.location.href = "vistas/inicio.html";
+  } catch (e) {
+    err.textContent = "No se pudo validar el acceso.";
+    console.error(e);
+    soltar();
+  }
 }
 
 function togglePass() {
   const p = document.getElementById("p");
-  p.type = p.type === "password" ? "text" : "password";
+  const btn = document.getElementById("btn-pass");
+  if (!p) return;
+  const show = p.type === "password";
+  p.type = show ? "text" : "password";
+  if (btn) {
+    btn.textContent = show ? "Ocultar" : "Ver";
+    btn.setAttribute("aria-pressed", show ? "true" : "false");
+    btn.setAttribute("aria-label", show ? "Ocultar contraseña" : "Mostrar contraseña");
+  }
 }
 
 function clp(n) {
@@ -329,3 +966,39 @@ function clp(n) {
 function qs(name) {
   return new URLSearchParams(location.search).get(name);
 }
+
+function avisoMal(titulo) {
+  const t = String(titulo || "").trim().toLowerCase();
+  return /^(no se|no hay|falta|revisa|error|fechas invertidas|nada que)/.test(t);
+}
+
+function cuadro(titulo, texto) {
+  let modal = document.getElementById("aviso-resultado");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.className = "modal-bg";
+    modal.id = "aviso-resultado";
+    modal.innerHTML =
+      '<div class="modal-card modal-angosta" role="dialog" aria-modal="true">' +
+      '<div class="aviso-marca" id="aviso-resultado-marca" aria-hidden="true"></div>' +
+      '<div class="modal-head"><h3 id="aviso-resultado-tit">Listo</h3>' +
+      '<button class="btn btn-ghost" type="button" id="aviso-resultado-x">Cerrar</button></div>' +
+      '<p id="aviso-resultado-txt"></p></div>';
+    document.body.appendChild(modal);
+    modal.querySelector("#aviso-resultado-x").onclick = () => { modal.hidden = true; };
+    modal.addEventListener("click", (ev) => { if (ev.target === modal) modal.hidden = true; });
+  }
+  const mal = avisoMal(titulo);
+  const card = modal.querySelector(".modal-card");
+  card.classList.toggle("aviso-ok", !mal);
+  card.classList.toggle("aviso-mal", mal);
+  const marca = modal.querySelector("#aviso-resultado-marca");
+  marca.className = "aviso-marca " + (mal ? "mal" : "ok");
+  marca.textContent = mal ? "✕" : "✓";
+  modal.querySelector("#aviso-resultado-tit").textContent = titulo;
+  modal.querySelector("#aviso-resultado-txt").textContent = texto;
+  modal.hidden = false;
+}
+window.cuadro = cuadro;
+window.cartaAnioHTML = cartaAnioHTML;
+window.cargarCierres = cargarCierres;

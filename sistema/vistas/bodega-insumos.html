@@ -4,71 +4,108 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bodega de insumos de obra</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=52" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="note">Stock para remodelar y para reactivas (tapas, silicona, pintura). No entra ropa de cama ni amenities: eso queda fuera del sistema.</p>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Insumo</th>
-            <th>Uso</th>
-            <th>Stock</th>
-            <th>Mínimo</th>
-            <th>Ubicación física</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Tapas WC</td>
-            <td>Reactiva baños</td>
-            <td>2</td>
-            <td>2</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip">En mínimo</span></td>
-          </tr>
-          <tr>
-            <td>Silicona sanitaria</td>
-            <td>Baños / remodelación</td>
-            <td>0</td>
-            <td>3</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip warn">Comprar</span></td>
-          </tr>
-          <tr>
-            <td>Pintura interior 4 L (blanco)</td>
-            <td>Habitaciones</td>
-            <td>4</td>
-            <td>2</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip ok">OK</span></td>
-          </tr>
-          <tr>
-            <td>Flexibles de agua</td>
-            <td>Reactiva</td>
-            <td>8</td>
-            <td>4</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip ok">OK</span></td>
-          </tr>
-          <tr>
-            <td>Pilas AAA</td>
-            <td>Controles TV</td>
-            <td>12</td>
-            <td>8</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip ok">OK</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <p style="margin-top:12px"><a href="reactivas.html">Ir a reactivas (descuenta stock)</a></p>
+      <p class="page-kicker">Remodelaciones</p>
+      <h2 class="page-title">Bodega de insumos</h2>
+      <p class="note">El stock es la suma de entradas menos las salidas. No se escribe a mano. Sirve para remodelar y para reactivas. No entra ropa de cama ni amenities.</p>
+      <p class="muted-mini" id="estado" style="text-align:center">Cargando la bodega…</p>
+      <div id="tabla"></div>
+      <section class="panel stock-form" id="entrada" hidden>
+        <h3 style="margin-top:0">Reponer</h3>
+        <p class="muted-mini">Una entrada suma al stock. La salida se registra desde la visita de una reactiva.</p>
+        <div class="form-grid">
+          <div>
+            <label for="ins">Insumo *</label>
+            <select id="ins"></select>
+          </div>
+          <div>
+            <label for="cant">Cantidad *</label>
+            <input id="cant" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="full">
+            <label for="nota">Nota</label>
+            <input id="nota" type="text" placeholder="Ej. compra recibida, factura 145" />
+          </div>
+        </div>
+        <p class="muted-mini" id="msg"></p>
+        <button class="btn btn-green" type="button" id="ok">Registrar entrada</button>
+      </section>
+      <p style="margin-top:12px;text-align:center"><a href="reactivas.html">Ir a reactivas</a></p>
     </main>
   </div>
-  <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Bodega insumos", href:"bodega-insumos.html"}]);</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/stock.js?v=1"></script>
+  <script src="../js/app.js?v=45"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Bodega insumos", href:"bodega-insumos.html"}]);
+
+    const estado = document.getElementById("estado");
+    const tabla = document.getElementById("tabla");
+    const entrada = document.getElementById("entrada");
+    const sel = document.getElementById("ins");
+    const msg = document.getElementById("msg");
+    let items = [];
+
+    function esc(val) {
+      return String(val == null ? "" : val).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+    }
+
+    function pintar() {
+      tabla.innerHTML = '<div class="table-scroll"><table class="data"><thead><tr>' +
+        "<th>Insumo</th><th>Uso</th><th>Stock</th><th>Mínimo</th><th>Estado</th></tr></thead><tbody>" +
+        items.map((it) => "<tr><td>" + esc(it.nombre) + "</td><td>" + esc(it.uso || "—") + "</td><td>" +
+          esc(window.textoCantidad(it.stock) + " " + it.unidad) + "</td><td>" + esc(window.textoCantidad(it.minimo)) +
+          '</td><td><span class="chip ' + window.chipStock(it.estado) + '">' + esc(it.estado) + "</span></td></tr>").join("") +
+        "</tbody></table></div>";
+      sel.innerHTML = items.map((it) => '<option value="' + it.id + '">' + esc(it.nombre) + "</option>").join("");
+    }
+
+    async function cargar() {
+      items = await window.cargarStock();
+      estado.hidden = true;
+      entrada.hidden = false;
+      pintar();
+    }
+
+    function avisoEntrada(texto) {
+      if (window.cuadro) cuadro("Entrada añadida", texto);
+    }
+
+    document.getElementById("ok").addEventListener("click", async () => {
+      msg.textContent = "";
+      const btn = document.getElementById("ok");
+      const cant = document.getElementById("cant");
+      const nota = document.getElementById("nota");
+      const elegido = items.find((it) => String(it.id) === sel.value);
+      btn.disabled = true;
+      try {
+        await window.moverStock(Number(sel.value), "entrada", cant.value, {
+          nota: nota.value.trim() || "Entrada de bodega"
+        });
+        const cuanto = window.textoCantidad(cant.value);
+        const unidad = elegido ? elegido.unidad : "";
+        const nombre = elegido ? elegido.nombre : "el insumo";
+        cant.value = "1";
+        nota.value = "";
+        await cargar();
+        avisoEntrada("Se añadió bien: " + cuanto + " " + unidad + " de " + nombre + ". El stock de arriba ya lo incluye.");
+      } catch (err) {
+        msg.textContent = err.message || "No se pudo registrar la entrada.";
+        if (window.cuadro) cuadro("No se añadió", msg.textContent);
+      }
+      btn.disabled = false;
+    });
+
+    cargar().catch((err) => {
+      estado.textContent = err.message || "No se pudo cargar la bodega.";
+    });
+  </script>
 </body>
 </html>
