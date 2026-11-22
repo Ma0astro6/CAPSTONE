@@ -4,75 +4,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Proveedores</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=58" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="note">Agenda de compra para remodelación y reactivas. No es el listado de proveedores de cocina ni de recepción.</p>
+      <p class="page-kicker">Remodelaciones</p>
+      <h2 class="page-title">Proveedores</h2>
+      <p class="note">Agenda de compra para remodelación. El mismo listado aparece al cargar una compra en la zona.</p>
+      <p class="muted-mini" id="prov-msg">Cargando…</p>
       <div class="filters">
-        <input type="search" placeholder="Nombre o rubro" />
-        <button class="btn" type="button">Nuevo proveedor</button>
+        <input type="search" id="filtro-prov" placeholder="Nombre o rubro" />
       </div>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Proveedor</th>
-            <th>Rubro</th>
-            <th>Contacto</th>
-            <th>Lo que se compra</th>
-            <th>Plazo típico</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Sodimac</td>
-            <td>Retail construcción</td>
-            <td>Sucursal más cercana</td>
-            <td>Tapas WC, silicona, herramientas</td>
-            <td>Mismo día</td>
-          </tr>
-          <tr>
-            <td>Easy</td>
-            <td>Retail construcción</td>
-            <td>—</td>
-            <td>Pintura, luminarias</td>
-            <td>Mismo día</td>
-          </tr>
-          <tr>
-            <td>Ceresita</td>
-            <td>Pinturas</td>
-            <td>Vendedor zona</td>
-            <td>Pintura interior / exterior</td>
-            <td>2–4 días</td>
-          </tr>
-          <tr>
-            <td>Maderas del Sur</td>
-            <td>Maderas</td>
-            <td>—</td>
-            <td>Guardapolvos, piso, molduras</td>
-            <td>1 semana</td>
-          </tr>
-          <tr>
-            <td>Ferretería local</td>
-            <td>Ferretería</td>
-            <td>Mostrador</td>
-            <td>Tornillos, chapas, flexibles</td>
-            <td>Mismo día</td>
-          </tr>
-          <tr>
-            <td>Técnico caldera autorizado</td>
-            <td>Servicio</td>
-            <td>Agenda anual</td>
-            <td>Mantención caldera</td>
-            <td>Según visita</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="panel" style="margin-bottom:14px">
+        <h3>Nuevo proveedor</h3>
+        <div class="form-grid">
+          <div><label for="prov-nombre">Nombre</label><input id="prov-nombre" type="text" /></div>
+          <div><label for="prov-rubro">Rubro</label><input id="prov-rubro" type="text" placeholder="Pinturas" /></div>
+          <div><label for="prov-contacto">Contacto</label><input id="prov-contacto" type="text" /></div>
+          <div><label for="prov-compra">Lo que se compra</label><input id="prov-compra" type="text" /></div>
+          <div><label for="prov-plazo">Plazo típico</label><input id="prov-plazo" type="text" placeholder="Mismo día" /></div>
+        </div>
+        <button class="btn" type="button" id="btn-prov" style="margin-top:12px">Guardar proveedor</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data" id="tabla-prov">
+          <thead>
+            <tr>
+              <th>Proveedor</th>
+              <th>Rubro</th>
+              <th>Contacto</th>
+              <th>Lo que se compra</th>
+              <th>Plazo típico</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </main>
   </div>
-  <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Proveedores", href:"proveedores.html"}]);</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/app.js?v=50"></script>
+  <script src="../js/remodelaciones.js?v=12"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Proveedores", href:"proveedores.html"}]);
+    RE.montarProveedores();
+  </script>
 </body>
 </html>

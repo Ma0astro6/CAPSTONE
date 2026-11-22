@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Archivo de trabajadores</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=58" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="page-kicker">Prevención</p>
+      <h2 class="page-title">Archivo de trabajadores</h2>
+      <p class="note">La misma persona que aparece en «quién» de una visita. Acá se anota el EPP, la ropa, las charlas y los papeles.</p>
+      <div id="trab-root"><p class="note">Cargando el archivo…</p></div>
+    </main>
+  </div>
+  <div class="modal-bg" id="trab-modal" hidden>
+    <div class="modal-card modal-angosta" role="dialog" aria-modal="true" aria-labelledby="nuevo-titulo">
+      <div class="modal-head">
+        <h3 id="nuevo-titulo">Nuevo trabajador</h3>
+        <button class="btn btn-ghost" type="button" id="nuevo-x">Cerrar</button>
+      </div>
+      <label for="nuevo-nombre">Nombre</label>
+      <input id="nuevo-nombre" type="text" />
+      <label for="nuevo-tipo">Tipo</label>
+      <select id="nuevo-tipo">
+        <option value="interno">Interno</option>
+        <option value="externo">Externo</option>
+      </select>
+      <label for="nuevo-empresa">Empresa</label>
+      <select id="nuevo-empresa"></select>
+      <button class="btn" type="button" id="nuevo-ok" style="margin-top:14px">Guardar</button>
+      <button class="btn" type="button" id="nuevo-cancelar" style="margin-left:8px;background:#6d6456">Cancelar</button>
+    </div>
+  </div>
+  <div class="modal-bg" id="quitar-modal" hidden>
+    <div class="modal-card modal-angosta" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h3>Quitar de la ficha</h3>
+        <button class="btn btn-ghost" type="button" id="quitar-x">Cerrar</button>
+      </div>
+      <p id="quitar-texto"></p>
+      <button class="btn" type="button" id="quitar-si" style="background:#8a3b2a">Sí, quitar</button>
+      <button class="btn" type="button" id="quitar-no" style="margin-left:8px;background:#6d6456">Cancelar</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/app.js?v=50"></script>
+  <script src="../js/trabajadores.js?v=3"></script>
+  <script>
+    mount([
+      {label:"Inicio", href:"inicio.html"},
+      {label:"Mantención", href:"mantencion.html"},
+      {label:"Archivo", href:"trabajadores.html"}
+    ], { agenda: false });
+  </script>
+</body>
+</html>

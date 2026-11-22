@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendario — Mantención</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=58" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="page-kicker">Mantención general</p>
+      <h2 class="page-title">Calendario</h2>
+      <p class="note">Lo que toca en equipos y en el predio. Si una fecha está cerca, queda arriba como aviso. La próxima visita que anotas al crear una mantención también aparece aquí.</p>
+      <div id="cal-root"></div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/app.js?v=50"></script>
+  <script src="../js/calendario.js?v=10"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Calendario", href:"calendario.html"}]);
+    montarCalendario();
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inicio — Obras Elalmendro</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css?v=3" />
+  <link rel="stylesheet" href="../css/estilos.css?v=58" />
 </head>
 <body>
   <div id="shell">
@@ -13,13 +13,23 @@
       <p class="page-kicker">Área interna</p>
       <h2 class="page-title">¿Qué quieres ver?</h2>
       <div class="grid-3">
-        <a class="tile t-man" href="mantencion.html"><h3>Mantención general</h3><p>Las planillas de Andrés: buscar, filtrar y registrar visita</p><span class="code">MG</span></a>
-        <a class="tile t-mej" href="mejoras.html"><h3>Mejoras</h3><p>Por hacer, plan anual y proyectos valorizados</p><span class="code">ME</span></a>
-        <a class="tile t-rem" href="remodelaciones.html"><h3>Remodelaciones</h3><p>Zonas del predio, compras, proveedores y Gantt</p><span class="code">RE</span></a>
+        <a class="tile t-man" data-menu="mg" href="mantencion.html"><h3>Mantención general</h3><p>Las planillas de Andrés: buscar, filtrar y registrar visita</p><span class="code">MG</span></a>
+        <a class="tile t-mej" data-menu="me" href="mejoras.html"><h3>Mejoras</h3><p>Por hacer, plan anual y proyectos valorizados</p><span class="code">ME</span></a>
+        <a class="tile t-rem" data-menu="re" href="remodelaciones.html"><h3>Remodelaciones</h3><p>Zonas del predio, compras, proveedores y Gantt</p><span class="code">RE</span></a>
       </div>
+      <a class="tile tile-bodega" data-menu="bodega" href="bodega-insumos.html"><h3>Bodega</h3><p>Inventario de insumos</p></a>
     </main>
   </div>
-  <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"}], { agenda: true });</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/datos.js?v=9"></script>
+  <script src="../js/app.js?v=50"></script>
+  <script src="../js/calendario.js?v=10"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"}], { agenda: true });
+    if (window.pintarBotonesInicio) pintarBotonesInicio();
+    if (window.pintarAvisosEnInicio) pintarAvisosEnInicio();
+  </script>
 </body>
 </html>

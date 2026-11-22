@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plan del año — Prevención</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=58" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="page-kicker">Prevención</p>
+      <h2 class="page-title">Plan del año</h2>
+      <p class="note">Cada barra es una tarea de prevención que ya tiene inicio y fin. El clic abre el detalle. La carta del inicio no cambia.</p>
+      <div id="anios" class="anio-switch" hidden></div>
+      <div id="plan-host"><p class="note">Cargando la carta…</p></div>
+      <p class="plan-lista"><a href="prevencion.html">Ver la lista de tareas</a></p>
+    </main>
+  </div>
+  <div class="modal-bg" id="estado-modal" hidden>
+    <div class="modal-card modal-angosta" role="dialog" aria-modal="true" aria-labelledby="estado-titulo">
+      <div class="modal-head">
+        <h3 id="estado-titulo">Estado de la tarea</h3>
+        <button class="btn btn-ghost" type="button" id="estado-x">Cerrar</button>
+      </div>
+      <p id="estado-nombre"></p>
+      <div id="estado-opciones" class="estado-ops"></div>
+      <button class="btn" type="button" id="estado-cancelar" style="background:#6d6456">Cancelar</button>
+    </div>
+  </div>
+  <div class="modal-bg" id="hecho-modal" hidden>
+    <div class="modal-card modal-angosta" role="dialog" aria-modal="true" aria-labelledby="hecho-titulo">
+      <div class="modal-head">
+        <h3 id="hecho-titulo">¿Seguro que se hizo?</h3>
+        <button class="btn btn-ghost" type="button" id="hecho-x">Cerrar</button>
+      </div>
+      <p id="hecho-texto"></p>
+      <button class="btn btn-green" type="button" id="hecho-si">Sí, se hizo</button>
+      <button class="btn" type="button" id="hecho-no" style="margin-left:8px;background:#6d6456">Cancelar</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/datos.js?v=9"></script>
+  <script src="../js/app.js?v=50"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Plan del año", href:"prevencion-plan.html"}], { agenda: false });
+
+    const host = document.getElementById("plan-host");
+    const anios = document.getElementById("anios");
+    let tareas = [];
+    let anioVisto = new Date().getFullYear();
+
+    function esc(val) {
+      return String(val == null ? "" : val)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function aCl(iso) {
+      const p = String(iso || "").slice(0, 10).split("-");
+      return p.length === 3 ? p[2] + "-" + p[1] + "-" + p[0] : "";
+    }
+
+    const ESTADOS = [
+      ["planificada", "Planificada"],
+      ["en_curso", "En curso"],
+      ["pendiente", "Pendiente"],
+      ["por_cerrar", "Por cerrar"],
+      ["atrasada", "Atrasada"],
+      ["hecha", "Hecho"],
+      ["cancelada", "Cancelada"]
+    ];
+
+    function etiqueta(t) {
+      const par = ESTADOS.find((e) => e[0] === t.estado);
+      return par ? par[1] : "Planificada";
+    }
+
+    function quienDe(notas) {
+      try { return (JSON.parse(notas || "{}").quien) || ""; } catch (e) { return ""; }
+    }
+
+    function toca(t, y) {
+      const a = y + "-01-01";
+      const b = y + "-12-31";
+      return t.fecha_inicio <= b && t.fecha_fin >= a;
+    }
+
+    function listaHTML(y, items) {
+      const filas = items.length
+        ? items.map((it) => {
+          return `<div class="plan-fila">
+            <div><b>${esc(it.nom)}</b><small>${esc(aCl(it.ini))}${it.ini === it.fin ? "" : " – " + esc(aCl(it.fin))}${it.quien ? " · " + esc(it.quien) : ""}</small></div>
+            <button type="button" class="plan-estado" data-cambiar="${esc(it.id)}">${esc(it.estado)}</button>
+          </div>`;
+        }).join("")
+        : '<p class="note">Este año no tiene tareas. Crea una y aparece en la carta.</p>';
+      return `<section class="plan-panel">
+        <div class="plan-panel-head">
+          <h3>Tareas de ${y}</h3>
+          <button type="button" class="plan-crear" id="abrir-crear">Crear tarea</button>
+        </div>
+        <form id="plan-form" class="plan-form" hidden>
+          <div><label for="nueva-nom">Tarea</label><input id="nueva-nom" required maxlength="200" placeholder="Protocolo, capacitación…"></div>
+          <div><label for="nueva-ini">Inicio</label><input id="nueva-ini" type="date" required></div>
+          <div><label for="nueva-fin">Fin</label><input id="nueva-fin" type="date" required></div>
+          <div><label for="nueva-quien">Quién</label><input id="nueva-quien" maxlength="80" placeholder="Opcional"></div>
+          <button class="plan-hecho" type="submit">Guardar</button>
+        </form>
+        ${filas}
+      </section>`;
+    }
+
+    function pintar(y) {
+      anioVisto = y;
+      const main = document.querySelector("#shell main");
+      if (anios.parentElement !== main) main.insertBefore(anios, host);
+      window.PLAN_PREV = {};
+      const items = tareas.filter((t) => toca(t, y)).map((t) => {
+        const it = {
+          id: String(t.id),
+          nom: t.nombre,
+          ini: t.fecha_inicio,
+          fin: t.fecha_fin,
+          estado: etiqueta(t),
+          quien: quienDe(t.notas)
+        };
+        window.PLAN_PREV[it.id] = it;
+        return it;
+      });
+      host.innerHTML = window.cartaAnioHTML(items, y) + listaHTML(y, items);
+      const head = host.querySelector(".agenda-head");
+      if (head) head.appendChild(anios);
+      anios.hidden = false;
+      anios.querySelectorAll("button").forEach((b) => {
+        const on = Number(b.getAttribute("data-anio")) === y;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      const abrir = document.getElementById("abrir-crear");
+      const form = document.getElementById("plan-form");
+      if (abrir && form) {
+        abrir.onclick = () => {
+          form.hidden = false;
+          abrir.hidden = true;
+          document.getElementById("nueva-nom").focus();
+        };
+        form.onsubmit = (ev) => {
+          ev.preventDefault();
+          crearTarea();
+        };
+      }
+    }
+
+    let estadoPendiente = null;
+
+    function cerrarEstado() {
+      document.getElementById("estado-modal").hidden = true;
+      estadoPendiente = null;
+    }
+
+    function cerrarHecho() {
+      document.getElementById("hecho-modal").hidden = true;
+    }
+
+    function abrirEstado(id) {
+      const t = tareas.find((x) => String(x.id) === String(id));
+      if (!t) return;
+      estadoPendiente = t;
+      document.getElementById("estado-nombre").textContent = t.nombre;
+      document.getElementById("estado-opciones").innerHTML = ESTADOS.map(([codigo, nombre]) => {
+        const clases = [];
+        if (t.estado === codigo) clases.push("on");
+        if (codigo === "cancelada") clases.push("cancelada");
+        return '<button type="button" data-nuevo="' + codigo + '"' +
+          (clases.length ? ' class="' + clases.join(" ") + '"' : "") + ">" + nombre + "</button>";
+      }).join("");
+      document.getElementById("estado-modal").hidden = false;
+    }
+
+    async function guardarEstado(t, codigo) {
+      const nombre = (ESTADOS.find((e) => e[0] === codigo) || ["", "Planificada"])[1];
+      let notas = {};
+      try { notas = JSON.parse(t.notas || "{}"); } catch (e) { notas = {}; }
+      notas.estado = nombre;
+      const up = await window.db.from("tarea").update({
+        estado: codigo,
+        notas: JSON.stringify(notas)
+      }).eq("id", t.id);
+      if (up.error) {
+        if (window.cuadro) cuadro("No se guardó", up.error.message);
+        return;
+      }
+      t.estado = codigo;
+      t.notas = JSON.stringify(notas);
+      if (window.cuadro) cuadro("Estado guardado", t.nombre + " quedó " + nombre.toLowerCase() + ".");
+      pintar(anioVisto);
+    }
+
+    function pedirHecho(t) {
+      document.getElementById("hecho-texto").textContent =
+        "¿Seguro que «" + t.nombre + "» se hizo? Queda hecha en la carta y en la lista.";
+      document.getElementById("hecho-modal").hidden = false;
+    }
+
+    async function crearTarea() {
+      const nombre = document.getElementById("nueva-nom").value.trim();
+      const ini = document.getElementById("nueva-ini").value;
+      const fin = document.getElementById("nueva-fin").value;
+      const quien = document.getElementById("nueva-quien").value.trim();
+      if (!nombre || !ini || !fin) {
+        if (window.cuadro) cuadro("Falta un dato", "La tarea, el inicio y el fin son obligatorios.");
+        return;
+      }
+      if (fin < ini) {
+        if (window.cuadro) cuadro("Fechas invertidas", "El fin no puede ser anterior al inicio.");
+        return;
+      }
+      const codigo = ("mg:prevencion:" + String(Date.now()).slice(-6)).slice(0, 20);
+      const notas = {
+        id: codigo,
+        tarea: nombre,
+        quien,
+        inicio: aCl(ini),
+        fin: aCl(fin),
+        estado: "Planificada"
+      };
+      const ins = await window.db.from("tarea").insert({
+        pilar: "MG",
+        tipo: "prevencion",
+        codigo,
+        nombre: nombre.slice(0, 200),
+        fecha_inicio: ini,
+        fecha_fin: fin,
+        estado: "planificada",
+        mostrar_gantt: true,
+        notas: JSON.stringify(notas)
+      }).select("id, nombre, fecha_inicio, fecha_fin, estado, notas").single();
+      if (ins.error) {
+        if (window.cuadro) cuadro("No se guardó", ins.error.message);
+        return;
+      }
+      tareas.push(ins.data);
+      tareas.sort((a, b) => String(a.fecha_inicio).localeCompare(String(b.fecha_inicio)));
+      if (window.cuadro) cuadro("Tarea creada", nombre + " quedó en el plan.");
+      pintar(Number(ini.slice(0, 4)));
+    }
+
+    host.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-cambiar]");
+      if (!btn) return;
+      abrirEstado(btn.getAttribute("data-cambiar"));
+    });
+
+    document.getElementById("estado-opciones").addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-nuevo]");
+      const t = estadoPendiente;
+      if (!btn || !t) return;
+      const codigo = btn.getAttribute("data-nuevo");
+      cerrarEstado();
+      if (codigo === "hecha" && t.estado !== "hecha") {
+        estadoPendiente = t;
+        pedirHecho(t);
+        return;
+      }
+      if (codigo === t.estado) return;
+      guardarEstado(t, codigo);
+    });
+    document.getElementById("estado-x").onclick = cerrarEstado;
+    document.getElementById("estado-cancelar").onclick = cerrarEstado;
+    document.getElementById("estado-modal").addEventListener("click", (ev) => {
+      if (ev.target.id === "estado-modal") cerrarEstado();
+    });
+    document.getElementById("hecho-si").onclick = () => {
+      const t = estadoPendiente;
+      cerrarHecho();
+      estadoPendiente = null;
+      if (t) guardarEstado(t, "hecha");
+    };
+    document.getElementById("hecho-no").onclick = () => {
+      cerrarHecho();
+      estadoPendiente = null;
+    };
+    document.getElementById("hecho-x").onclick = () => {
+      cerrarHecho();
+      estadoPendiente = null;
+    };
+    document.getElementById("hecho-modal").addEventListener("click", (ev) => {
+      if (ev.target.id === "hecho-modal") {
+        cerrarHecho();
+        estadoPendiente = null;
+      }
+    });
+
+    anios.addEventListener("click", (ev) => {
+      const b = ev.target.closest("button");
+      if (!b) return;
+      pintar(Number(b.getAttribute("data-anio")));
+    });
+
+    async function cargar() {
+      if (!window.db) {
+        host.innerHTML = '<p class="note">No hay conexión a la base.</p>';
+        return;
+      }
+      const q = await window.db.from("tarea")
+        .select("id, nombre, fecha_inicio, fecha_fin, estado, notas")
+        .eq("tipo", "prevencion")
+        .eq("mostrar_gantt", true)
+        .not("fecha_inicio", "is", null)
+        .not("fecha_fin", "is", null)
+        .order("fecha_inicio");
+      if (q.error) {
+        host.innerHTML = '<p class="note">' + q.error.message + '</p>';
+        if (window.cuadro) cuadro("No se cargó", q.error.message);
+        return;
+      }
+      tareas = q.data || [];
+      const anos = new Set([new Date().getFullYear()]);
+      tareas.forEach((t) => {
+        anos.add(Number(String(t.fecha_inicio).slice(0, 4)));
+        anos.add(Number(String(t.fecha_fin).slice(0, 4)));
+      });
+      const lista = [...anos].filter((n) => n > 2000).sort((a, b) => a - b);
+      anios.innerHTML = lista.map((n) => `<button type="button" data-anio="${n}">${n}</button>`).join("");
+      const actual = new Date().getFullYear();
+      const conDatos = lista.filter((n) => tareas.some((t) => toca(t, n)));
+      pintar(tareas.some((t) => toca(t, actual)) ? actual : (conDatos[conDatos.length - 1] || actual));
+    }
+
+    cargar();
+  </script>
+</body>
+</html>

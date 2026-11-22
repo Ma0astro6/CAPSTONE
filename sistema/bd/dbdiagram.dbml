@@ -1,0 +1,237 @@
+// ============================================================
+//  Elalmendro Ecohotel — Obras · Mantención · Mejora
+//  Pegar en https://dbdiagram.io  →  Create new diagram → pegar
+// ============================================================
+
+// ---------- Seguridad ----------
+Table usuario {
+  id          int [pk, increment]
+  nombre      varchar(120) [not null]
+  correo      varchar(160) [unique, not null]
+  clave_hash  varchar(255) [not null]
+  rol         varchar(20) [not null, note: 'admin | mantencion']
+  activo      boolean [default: true]
+  creado_en   timestamp
+}
+
+// ---------- Catálogos ----------
+Table zona {
+  id             int [pk, increment]
+  codigo         varchar(20) [unique, not null, note: '107, sol, hotel']
+  nombre         varchar(120) [not null]
+  tipo           varchar(20) [not null, note: 'edificio | cabana | habitacion | exterior | recinto']
+  piso           smallint [note: '1, 2, 3']
+  zona_padre_id  int [ref: > zona.id]
+  activa         boolean [default: true]
+}
+
+Table proveedor {
+  id             int [pk, increment]
+  nombre         varchar(120) [unique, not null]
+  rubro          varchar(80)
+  contacto       varchar(120)
+  telefono       varchar(60)
+  correo         varchar(160)
+  que_se_compra  varchar(200)
+  plazo_tipico   varchar(60)
+  activo         boolean [default: true]
+}
+
+Table trabajador {
+  id            int [pk, increment]
+  nombre        varchar(120) [not null]
+  tipo          varchar(20) [not null, note: 'interno | externo']
+  proveedor_id  int [ref: > proveedor.id]
+  activo        boolean [default: true]
+}
+
+Table tipo_trabajo {
+  id      int [pk, increment]
+  nombre  varchar(60) [unique, not null, note: 'Revisión, Limpieza, Reparación, Recambio, Succión, Preventiva']
+}
+
+Table categoria_activo {
+  id      int [pk, increment]
+  codigo  varchar(30) [unique, not null, note: 'maquina, radiador, fosa, bodega, puerta, bano, tv']
+  nombre  varchar(80) [not null]
+  grupo   varchar(20) [not null, note: 'Equipos | Predio | Habitaciones | Urgencias']
+  orden   smallint
+}
+
+// ---------- Mantención: activos ----------
+Table activo {
+  id             int [pk, increment]
+  categoria_id   int [not null, ref: > categoria_activo.id]
+  codigo         varchar(30)
+  nombre         varchar(160) [not null]
+  subtipo        varchar(40) [note: 'Fosa / Grasera / Cámara / Planta']
+  zona_id        int [ref: > zona.id]
+  ubicacion_det  varchar(160)
+  proveedor_id   int [ref: > proveedor.id]
+  activo         boolean [default: true]
+  notas          text
+}
+
+Table activo_tv {
+  activo_id  int [pk, ref: - activo.id]
+  marca      varchar(40)
+  pulgadas   varchar(20)
+}
+
+Table componente {
+  id              int [pk, increment]
+  activo_id       int [not null, ref: > activo.id]
+  nombre          varchar(60) [not null, note: 'Lavamanos, Tina, Porta rollo, Control TV, Control deco']
+  especificacion  varchar(60) [note: 'tipo de pila AAA / AA']
+  estado          varchar(60)
+}
+
+// ---------- Mejoras ----------
+Table idea_mejora {
+  id             int [pk, increment]
+  titulo         varchar(160) [not null]
+  area           varchar(20) [not null, note: 'obras | jardin | equipos']
+  propuesta_por  int [ref: > trabajador.id]
+  estado         varchar(20) [not null, note: 'idea | en_estudio | urgente | valorizada | descartada']
+  pasa_a         varchar(80)
+  fecha          date
+  notas          text
+}
+
+Table proyecto {
+  id                int [pk, increment]
+  idea_id           int [ref: > idea_mejora.id]
+  nombre            varchar(160) [not null]
+  costo_materiales  decimal
+  costo_mano_obra   decimal
+  estado            varchar(20) [not null, note: 'carpeta | futuro | aprobado | ejecutado']
+  carpeta_jefes     boolean
+  anio              smallint
+  notas             text
+}
+
+// ---------- Remodelaciones ----------
+Table obra {
+  id              int [pk, increment]
+  zona_id         int [not null, ref: > zona.id]
+  nombre          varchar(160) [not null]
+  tipo            varchar(20) [not null, note: 'remodelacion | renovacion | pintura | reparacion']
+  estado          varchar(20) [not null, note: 'planificada | en_curso | por_cerrar | cerrada']
+  fecha_inicio    date
+  fecha_fin_plan  date
+  fecha_fin_real  date
+  presupuesto     decimal
+  responsable_id  int [ref: > trabajador.id]
+  notas           text
+}
+
+Table compra {
+  id             int [pk, increment]
+  obra_id        int [ref: > obra.id]
+  aviso_id       int [ref: > aviso.id]
+  insumo_id      int [ref: > insumo.id]
+  proveedor_id   int [not null, ref: > proveedor.id]
+  item           varchar(160) [not null]
+  cantidad       decimal [not null]
+  neto_unitario  decimal [not null]
+  iva_pct        decimal [default: 19]
+  estado         varchar(20) [not null, note: 'cotizado | pedido | comprado | recibido | en_stock | anulado']
+  fecha          date
+  documento      varchar(80)
+  usuario_id     int [ref: > usuario.id]
+}
+
+// ---------- Tareas (Gantt / Calendario / Cierre) ----------
+Table tarea {
+  id              int [pk, increment]
+  pilar           varchar(5) [not null, note: 'MG | ME | RE']
+  tipo            varchar(20) [not null, note: 'faena_jardin | riego | prevencion | plan_anual | hito_obra | recurrente']
+  codigo          varchar(20) [note: '1.1, 1.1.1 prevención']
+  nombre          varchar(200) [not null]
+  zona_id         int [ref: > zona.id]
+  activo_id       int [ref: > activo.id]
+  obra_id         int [ref: > obra.id]
+  proyecto_id     int [ref: > proyecto.id]
+  responsable_id  int [ref: > trabajador.id]
+  fecha_inicio    date
+  fecha_fin       date
+  estado          varchar(20) [not null, note: 'planificada | en_curso | por_cerrar | pendiente | atrasada | hecha | cancelada']
+  prioridad       varchar(20)
+  temporada       varchar(20) [note: 'invierno | verano | ambas']
+  periodicidad    varchar(60)
+  costo_estimado  decimal
+  mostrar_gantt   boolean [default: true]
+  notas           text
+}
+
+Table cierre_tarea {
+  id            int [pk, increment]
+  tarea_id      int [not null, ref: > tarea.id]
+  fecha         date [not null]
+  resultado     varchar(20) [not null, note: 'hecho | pendiente']
+  fecha_retoma  date
+  nota          varchar(300)
+  usuario_id    int [not null, ref: > usuario.id]
+  creado_en     timestamp
+}
+
+// ---------- Reactivas e insumos ----------
+Table aviso {
+  id           int [pk, increment]
+  fecha        timestamp
+  origen       varchar(20) [not null, note: 'recepcion | huesped | equipo | andres']
+  zona_id      int [not null, ref: > zona.id]
+  activo_id    int [ref: > activo.id]
+  descripcion  varchar(300) [not null]
+  prioridad    varchar(20)
+  estado       varchar(20) [not null, note: 'abierto | en_curso | cerrado']
+  usuario_id   int [ref: > usuario.id]
+}
+
+Table insumo {
+  id            int [pk, increment]
+  nombre        varchar(120) [unique, not null]
+  uso           varchar(120)
+  unidad        varchar(20)
+  stock_minimo  decimal
+  bodega_id     int [ref: > activo.id, note: 'activo categoría bodega']
+  activo        boolean [default: true]
+}
+
+Table movimiento_insumo {
+  id          int [pk, increment]
+  insumo_id   int [not null, ref: > insumo.id]
+  fecha       timestamp
+  tipo        varchar(20) [not null, note: 'entrada | salida | ajuste']
+  cantidad    decimal [not null]
+  visita_id   int [ref: > visita.id]
+  compra_id   int [ref: > compra.id]
+  usuario_id  int [ref: > usuario.id]
+  nota        varchar(200)
+}
+
+// ---------- Visitas (historial) ----------
+Table visita {
+  id               int [pk, increment]
+  fecha            date [not null]
+  activo_id        int [ref: > activo.id]
+  componente_id    int [ref: > componente.id]
+  tarea_id         int [ref: > tarea.id]
+  aviso_id         int [ref: > aviso.id]
+  tipo_trabajo_id  int [not null, ref: > tipo_trabajo.id]
+  trabajador_id    int [not null, ref: > trabajador.id]
+  proveedor_id     int [ref: > proveedor.id]
+  detalle          text [not null]
+  costo            decimal
+  proxima_fecha    date
+  usuario_id       int [not null, ref: > usuario.id]
+  creado_en        timestamp
+}
+
+// ---------- Presupuesto ----------
+Table presupuesto_anual {
+  id     int [pk, increment]
+  anio   smallint [not null]
+  pilar  varchar(5) [not null, note: 'MG | ME | RE']
+  monto  decimal [not null]
+}

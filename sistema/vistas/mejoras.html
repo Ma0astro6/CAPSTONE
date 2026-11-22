@@ -4,61 +4,75 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mejoras</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=58" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="note">Tres capas como los Excel de “Mejoras / proyectos futuros”: ideas por hacer, plan anual (obras y jardín) y proyectos ya valorizados para jefes.</p>
+      <p class="page-kicker">Mejoras</p>
+      <h2 class="page-title">Ideas, plan anual y proyectos</h2>
+      <p class="note">Las ideas quedan en esta lista. El valor aproximado es opcional y no entra a la carta Gantt hasta que pase al plan.</p>
+
       <div class="kpi">
         <div class="box"><span>Carpeta valorizada</span><b>$ 4.2M</b></div>
         <div class="box"><span>Plan anual obras 2026</span><b>$ 1.5M</b></div>
-        <div class="box"><span>Ideas sin valorizar</span><b>6</b></div>
+        <div class="box"><span>Ideas sin valorizar</span><b id="kpi-ideas">—</b></div>
       </div>
 
       <h3 style="margin:18px 0 8px">Por hacer (ideas)</h3>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Idea</th>
-            <th>Área</th>
-            <th>Quién la propone</th>
-            <th>Estado</th>
-            <th>Pasa a</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Zona parrilla eventos</td>
-            <td>Obras</td>
-            <td>Equipo</td>
-            <td><span class="chip">Idea</span></td>
-            <td>Valorizar</td>
-          </tr>
-          <tr>
-            <td>Línea de árboles acceso</td>
-            <td>Jardín</td>
-            <td>Andrés</td>
-            <td><span class="chip">Idea</span></td>
-            <td>Plan anual jardín</td>
-          </tr>
-          <tr>
-            <td>Iluminación sendero cabañas</td>
-            <td>Obras</td>
-            <td>Equipo</td>
-            <td><span class="chip">En estudio</span></td>
-            <td>Cotizar</td>
-          </tr>
-          <tr>
-            <td>Techumbre bodega jardín</td>
-            <td>Obras</td>
-            <td>Mantención</td>
-            <td><span class="chip warn">Urgente (humedad)</span></td>
-            <td>Remodelación / compra</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="work-wrap">
+        <div>
+          <div class="table-scroll">
+            <table class="data" id="tbl-ideas">
+              <thead>
+                <tr>
+                  <th>Idea</th>
+                  <th>Área</th>
+                  <th>Quién la propone</th>
+                  <th>Estado</th>
+                  <th>Valor aprox.</th>
+                  <th>Pasa a</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="panel visita">
+          <h3>Nueva idea</h3>
+          <p class="muted-mini" id="idea-msg">Queda en la lista de arriba.</p>
+          <label for="i-titulo">Idea *</label>
+          <input id="i-titulo" type="text" placeholder="Ej. iluminación sendero cabañas" />
+          <label for="i-area">Área *</label>
+          <select id="i-area">
+            <option value="obras">Obras</option>
+            <option value="jardin">Jardín</option>
+            <option value="equipos">Equipos</option>
+          </select>
+          <label for="i-quien">Quién la propone *</label>
+          <input id="i-quien" type="text" placeholder="Andrés, Equipo, Mantención…" />
+          <label for="i-estado">Estado</label>
+          <select id="i-estado">
+            <option value="idea">Idea</option>
+            <option value="en_estudio">En estudio</option>
+            <option value="urgente">Urgente</option>
+          </select>
+          <label for="i-pasa">Pasa a</label>
+          <select id="i-pasa">
+            <option value="Valorizar">Valorizar</option>
+            <option value="Cotizar">Cotizar</option>
+            <option value="Plan anual obras">Plan anual obras</option>
+            <option value="Plan anual jardín">Plan anual jardín</option>
+            <option value="Remodelación / compra">Remodelación / compra</option>
+          </select>
+          <label for="i-monto">Valor aproximado (CLP)</label>
+          <input id="i-monto" type="number" min="0" step="1000" placeholder="Opcional, ej. 180000" />
+          <label for="i-nota">Nota (opcional)</label>
+          <textarea id="i-nota" rows="2" placeholder="Por qué importa o qué falta cotizar"></textarea>
+          <button class="btn btn-full" type="button" id="i-ok">Agregar idea</button>
+        </aside>
+      </div>
 
       <h3 style="margin:22px 0 8px">Plan anual 2026 — obras</h3>
       <table class="data">
@@ -130,7 +144,128 @@
       </div>
     </main>
   </div>
-  <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Mejoras", href:"mejoras.html"}]);</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/app.js?v=50"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mejoras", href:"mejoras.html"}], { agenda: false });
+
+    const AREA_LABEL = { obras: "Obras", jardin: "Jardín", equipos: "Equipos" };
+    const ESTADO_LABEL = { idea: "Idea", en_estudio: "En estudio", urgente: "Urgente", valorizada: "Valorizada", descartada: "Descartada" };
+
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function chipEstado(estado) {
+      if (estado === "urgente") return '<span class="chip warn">Urgente</span>';
+      if (estado === "en_estudio") return '<span class="chip">En estudio</span>';
+      return '<span class="chip">' + esc(ESTADO_LABEL[estado] || estado) + "</span>";
+    }
+
+    const tbody = document.querySelector("#tbl-ideas tbody");
+    const kpi = document.getElementById("kpi-ideas");
+    const msg = document.getElementById("idea-msg");
+    let ideas = [];
+
+    function dinero(n) {
+      const v = Number(n);
+      if (!Number.isFinite(v) || v <= 0) return "—";
+      return "$ " + Math.round(v).toLocaleString("es-CL");
+    }
+
+    function pintar() {
+      const sinValor = ideas.filter((i) => !(Number(i.monto_aprox) > 0)).length;
+      kpi.textContent = String(sinValor);
+      tbody.innerHTML = ideas.map((i) => `
+        <tr>
+          <td>${esc(i.titulo)}${i.notas ? "<br><small class='muted-mini'>" + esc(i.notas) + "</small>" : ""}</td>
+          <td>${esc(AREA_LABEL[i.area] || i.area)}</td>
+          <td>${esc(i.proponente || "—")}</td>
+          <td>${chipEstado(i.estado)}</td>
+          <td class="num">${dinero(i.monto_aprox)}</td>
+          <td>${esc(i.pasa_a || "—")}</td>
+        </tr>`).join("") || "<tr><td colspan='6'>Aún no hay ideas.</td></tr>";
+    }
+
+    async function cargar() {
+      if (!window.db) {
+        msg.textContent = "No hay conexión a la base.";
+        return;
+      }
+      msg.textContent = "Cargando ideas desde la base…";
+      const { data, error } = await db
+        .from("idea_mejora")
+        .select("id, titulo, area, proponente, estado, pasa_a, notas, fecha, monto_aprox")
+        .order("id", { ascending: false });
+      if (error) {
+        msg.textContent = "Error al leer: " + error.message;
+        console.error(error);
+        return;
+      }
+      ideas = data || [];
+      pintar();
+      msg.textContent = ideas.length + " ideas en esta lista.";
+    }
+
+    function limpiar() {
+      document.getElementById("i-titulo").value = "";
+      document.getElementById("i-area").value = "obras";
+      document.getElementById("i-quien").value = "";
+      document.getElementById("i-estado").value = "idea";
+      document.getElementById("i-pasa").value = "Valorizar";
+      document.getElementById("i-nota").value = "";
+      document.getElementById("i-monto").value = "";
+    }
+
+    document.getElementById("i-ok").addEventListener("click", async () => {
+      const titulo = document.getElementById("i-titulo").value.trim();
+      const area = document.getElementById("i-area").value;
+      const proponente = document.getElementById("i-quien").value.trim();
+      const estado = document.getElementById("i-estado").value;
+      const pasa_a = document.getElementById("i-pasa").value;
+      const notas = document.getElementById("i-nota").value.trim() || null;
+      const bruto = document.getElementById("i-monto").value.trim();
+      const monto_aprox = bruto === "" ? null : Math.round(Number(bruto));
+      if (bruto !== "" && !(monto_aprox >= 0)) {
+        msg.textContent = "El valor aproximado tiene que ser un número.";
+        if (window.cuadro) cuadro("Falta un dato", msg.textContent);
+        return;
+      }
+      if (!titulo || !proponente) {
+        msg.textContent = "Faltan la idea o quién la propone.";
+        if (window.cuadro) cuadro("Falta un dato", msg.textContent);
+        return;
+      }
+      if (!window.db) {
+        msg.textContent = "No hay conexión a la base.";
+        if (window.cuadro) cuadro("No se guardó", msg.textContent);
+        return;
+      }
+      msg.textContent = "Guardando…";
+      const { data, error } = await db
+        .from("idea_mejora")
+        .insert([{ titulo, area, proponente, estado, pasa_a, notas, monto_aprox }])
+        .select("id, titulo, area, proponente, estado, pasa_a, notas, fecha, monto_aprox")
+        .single();
+      if (error) {
+        msg.textContent = "Error al guardar: " + error.message;
+        if (window.cuadro) cuadro("No se guardó", error.message);
+        console.error(error);
+        return;
+      }
+      ideas.unshift(data);
+      limpiar();
+      pintar();
+      msg.textContent = "";
+      if (window.cuadro) cuadro("Idea guardada", "Quedó en mejoras: " + titulo + ".");
+    });
+
+    cargar();
+  </script>
 </body>
 </html>

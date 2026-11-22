@@ -4,71 +4,239 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bodega de insumos de obra</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=58" />
 </head>
 <body>
   <div id="shell">
     <main class="main">
-      <p class="note">Stock para remodelar y para reactivas (tapas, silicona, pintura). No entra ropa de cama ni amenities: eso queda fuera del sistema.</p>
-      <table class="data">
-        <thead>
-          <tr>
-            <th>Insumo</th>
-            <th>Uso</th>
-            <th>Stock</th>
-            <th>Mínimo</th>
-            <th>Ubicación física</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Tapas WC</td>
-            <td>Reactiva baños</td>
-            <td>2</td>
-            <td>2</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip">En mínimo</span></td>
-          </tr>
-          <tr>
-            <td>Silicona sanitaria</td>
-            <td>Baños / remodelación</td>
-            <td>0</td>
-            <td>3</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip warn">Comprar</span></td>
-          </tr>
-          <tr>
-            <td>Pintura interior 4 L (blanco)</td>
-            <td>Habitaciones</td>
-            <td>4</td>
-            <td>2</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip ok">OK</span></td>
-          </tr>
-          <tr>
-            <td>Flexibles de agua</td>
-            <td>Reactiva</td>
-            <td>8</td>
-            <td>4</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip ok">OK</span></td>
-          </tr>
-          <tr>
-            <td>Pilas AAA</td>
-            <td>Controles TV</td>
-            <td>12</td>
-            <td>8</td>
-            <td>Bodega técnica</td>
-            <td><span class="chip ok">OK</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <p style="margin-top:12px"><a href="reactivas.html">Ir a reactivas (descuenta stock)</a></p>
+      <p class="page-kicker">Remodelaciones</p>
+      <h2 class="page-title">Bodega de insumos</h2>
+      <p class="note">El número sale de las entradas menos las salidas. Puedes corregirlo si el conteo no calza, buscar un insumo o agregar uno nuevo. No entra ropa de cama ni amenities.</p>
+      <p class="muted-mini" id="estado" style="text-align:center">Cargando la bodega…</p>
+      <div class="filters" style="justify-content:flex-start;align-items:center">
+        <input type="search" id="busca" placeholder="Buscar insumo" />
+        <div class="bodega-acciones">
+          <button class="btn btn-green" type="button" id="abrir-reponer">Reponer</button>
+          <button class="btn" type="button" id="abrir-corregir">Corregir</button>
+          <button class="btn" type="button" id="abrir-nuevo">Insumo nuevo</button>
+        </div>
+      </div>
+      <div id="tabla"></div>
+      <div class="modal-bg" id="entrada" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tit-reponer">
+          <div class="modal-head"><h3 id="tit-reponer">Reponer</h3><button class="btn btn-ghost" type="button" data-cerrar="entrada">Cerrar</button></div>
+          <p class="muted-mini">Una entrada suma al stock. Si al crear una mantención no anotas el insumo, el número no cambia y se corrige aquí.</p>
+          <div class="form-grid">
+            <div><label for="ins">Insumo *</label><select id="ins"></select></div>
+            <div><label for="cant">Cantidad *</label><input id="cant" type="number" min="1" step="1" value="1" /></div>
+            <div class="full"><label for="nota">Nota</label><input id="nota" type="text" placeholder="Ej. compra recibida, factura 145" /></div>
+          </div>
+          <p class="muted-mini" id="msg"></p>
+          <button class="btn btn-green" type="button" id="ok">Registrar entrada</button>
+        </div>
+      </div>
+      <div class="modal-bg" id="ajuste" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tit-corregir">
+          <div class="modal-head"><h3 id="tit-corregir">Corregir stock</h3><button class="btn btn-ghost" type="button" data-cerrar="ajuste">Cerrar</button></div>
+          <p class="muted-mini">Escribe el número que contaste. El mínimo queda fijo: es el aviso de compra, no el stock de hoy.</p>
+          <div class="form-grid">
+            <div><label for="aj-ins">Insumo</label><select id="aj-ins"></select></div>
+            <div><label for="aj-cant">Quedó en</label><input id="aj-cant" type="number" min="0" step="1" value="0" /></div>
+            <div><label for="aj-min">Mínimo</label><input id="aj-min" type="number" min="0" step="1" value="0" disabled /></div>
+          </div>
+          <button class="btn" type="button" id="aj-ok" style="margin-top:12px">Guardar conteo</button>
+        </div>
+      </div>
+      <div class="modal-bg" id="nuevo" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tit-nuevo">
+          <div class="modal-head"><h3 id="tit-nuevo">Insumo nuevo</h3><button class="btn btn-ghost" type="button" data-cerrar="nuevo">Cerrar</button></div>
+          <div class="form-grid">
+            <div><label for="nv-nom">Nombre *</label><input id="nv-nom" type="text" placeholder="Pilas AA" /></div>
+            <div><label for="nv-uso">Uso</label><input id="nv-uso" type="text" placeholder="Controles, baños…" /></div>
+            <div><label for="nv-stock">Stock inicial</label><input id="nv-stock" type="number" min="0" step="1" value="0" /></div>
+            <div><label for="nv-min">Mínimo</label><input id="nv-min" type="number" min="0" step="1" value="0" /></div>
+          </div>
+          <button class="btn" type="button" id="nv-ok" style="margin-top:12px">Agregar insumo</button>
+        </div>
+      </div>
+      <p style="margin-top:12px;text-align:center"><a href="reactivas.html">Ir a reactivas</a></p>
     </main>
   </div>
-  <script src="../js/app.js"></script>
-  <script>mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Bodega insumos", href:"bodega-insumos.html"}]);</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/stock.js?v=2"></script>
+  <script src="../js/app.js?v=50"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"},{label:"Bodega insumos", href:"bodega-insumos.html"}]);
+
+    const estado = document.getElementById("estado");
+    const tabla = document.getElementById("tabla");
+    const sel = document.getElementById("ins");
+    const msg = document.getElementById("msg");
+    const POR_PAGINA = 10;
+    let items = [];
+    let filtro = "";
+    let pagina = 0;
+
+    function esc(val) {
+      return String(val == null ? "" : val).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+    }
+
+    function opciones(elegido) {
+      return items.map((it) => '<option value="' + it.id + '"' + (String(it.id) === String(elegido) ? " selected" : "") + ">" + esc(it.nombre) + "</option>").join("");
+    }
+
+    function filtrados() {
+      const q = filtro.trim().toLowerCase();
+      return items.filter((it) => !q || (it.nombre + " " + (it.uso || "")).toLowerCase().includes(q));
+    }
+
+    function pintar() {
+      const lista = filtrados();
+      const paginas = Math.max(1, Math.ceil(lista.length / POR_PAGINA));
+      if (pagina >= paginas) pagina = paginas - 1;
+      if (pagina < 0) pagina = 0;
+      const slice = lista.slice(pagina * POR_PAGINA, pagina * POR_PAGINA + POR_PAGINA);
+      const pager = lista.length > POR_PAGINA
+        ? '<div class="pager"><button class="btn btn-ghost" type="button" id="pag-antes"' + (pagina === 0 ? " disabled" : "") + '>Anterior</button><b>' + (pagina + 1) + " de " + paginas + '</b><button class="btn btn-ghost" type="button" id="pag-despues"' + (pagina >= paginas - 1 ? " disabled" : "") + ">Siguiente</button></div>"
+        : "";
+      tabla.innerHTML = slice.length
+        ? '<div class="table-scroll"><table class="data"><thead><tr>' +
+          "<th>Insumo</th><th>Uso</th><th>Stock</th><th>Mínimo</th><th>Estado</th></tr></thead><tbody>" +
+          slice.map((it) => "<tr><td>" + esc(it.nombre) + "</td><td>" + esc(it.uso || "—") + "</td><td>" +
+            esc(window.textoCantidad(it.stock) + " " + it.unidad) + "</td><td>" + esc(window.textoCantidad(it.minimo)) +
+            '</td><td><span class="chip ' + window.chipStock(it.estado) + '">' + esc(it.estado) + "</span></td></tr>").join("") +
+          "</tbody></table></div>" + pager
+        : '<p class="muted-mini">Ningún insumo coincide con la búsqueda.</p>';
+      const antes = document.getElementById("pag-antes");
+      const despues = document.getElementById("pag-despues");
+      if (antes) antes.onclick = () => { pagina -= 1; pintar(); };
+      if (despues) despues.onclick = () => { pagina += 1; pintar(); };
+      const previo = sel.value;
+      const aj = document.getElementById("aj-ins");
+      const ajPrev = aj.value;
+      sel.innerHTML = opciones(previo);
+      aj.innerHTML = opciones(ajPrev);
+      const elegido = items.find((it) => String(it.id) === aj.value) || items[0];
+      if (elegido && document.activeElement !== document.getElementById("aj-cant")) {
+        document.getElementById("aj-cant").value = String(elegido.stock);
+        document.getElementById("aj-min").value = String(elegido.minimo);
+      }
+    }
+
+    function abrir(id) {
+      document.getElementById(id).hidden = false;
+    }
+    function cerrar(id) {
+      document.getElementById(id).hidden = true;
+    }
+
+    async function cargar() {
+      items = await window.cargarStock();
+      estado.hidden = true;
+      pintar();
+    }
+
+    document.getElementById("busca").addEventListener("input", (ev) => {
+      filtro = ev.target.value;
+      pagina = 0;
+      pintar();
+    });
+    document.getElementById("abrir-reponer").onclick = () => abrir("entrada");
+    document.getElementById("abrir-corregir").onclick = () => abrir("ajuste");
+    document.getElementById("abrir-nuevo").onclick = () => abrir("nuevo");
+    document.querySelectorAll("[data-cerrar]").forEach((btn) => {
+      btn.onclick = () => cerrar(btn.getAttribute("data-cerrar"));
+    });
+    ["entrada", "ajuste", "nuevo"].forEach((id) => {
+      document.getElementById(id).addEventListener("click", (ev) => {
+        if (ev.target.id === id) cerrar(id);
+      });
+    });
+
+    document.getElementById("aj-ins").addEventListener("change", () => {
+      const elegido = items.find((it) => String(it.id) === document.getElementById("aj-ins").value);
+      if (!elegido) return;
+      document.getElementById("aj-cant").value = String(elegido.stock);
+      document.getElementById("aj-min").value = String(elegido.minimo);
+    });
+
+    document.getElementById("aj-ok").addEventListener("click", async () => {
+      const btn = document.getElementById("aj-ok");
+      const id = Number(document.getElementById("aj-ins").value);
+      const cant = document.getElementById("aj-cant").value;
+      const elegido = items.find((it) => it.id === id);
+      btn.disabled = true;
+      try {
+        await window.fijarStock(id, cant, "Conteo de bodega");
+        await cargar();
+        cerrar("ajuste");
+        if (window.cuadro) cuadro("Stock corregido", (elegido ? elegido.nombre : "El insumo") + " quedó en " + cant + ".");
+      } catch (err) {
+        if (window.cuadro) cuadro("No se guardó", err.message || "No se pudo corregir el stock.");
+      }
+      btn.disabled = false;
+    });
+
+    document.getElementById("nv-ok").addEventListener("click", async () => {
+      const btn = document.getElementById("nv-ok");
+      const nombre = document.getElementById("nv-nom").value.trim();
+      btn.disabled = true;
+      try {
+        await window.crearInsumo({
+          nombre,
+          uso: document.getElementById("nv-uso").value,
+          stock: document.getElementById("nv-stock").value,
+          minimo: document.getElementById("nv-min").value
+        });
+        document.getElementById("nv-nom").value = "";
+        document.getElementById("nv-uso").value = "";
+        document.getElementById("nv-stock").value = "0";
+        document.getElementById("nv-min").value = "0";
+        await cargar();
+        cerrar("nuevo");
+        if (window.cuadro) cuadro("Insumo creado", nombre + " quedó en la bodega.");
+      } catch (err) {
+        if (window.cuadro) cuadro("No se guardó", err.message || "No se pudo crear el insumo.");
+      }
+      btn.disabled = false;
+    });
+
+    function avisoEntrada(texto) {
+      if (window.cuadro) cuadro("Entrada añadida", texto);
+    }
+
+    document.getElementById("ok").addEventListener("click", async () => {
+      msg.textContent = "";
+      const btn = document.getElementById("ok");
+      const cant = document.getElementById("cant");
+      const nota = document.getElementById("nota");
+      const elegido = items.find((it) => String(it.id) === sel.value);
+      btn.disabled = true;
+      try {
+        await window.moverStock(Number(sel.value), "entrada", cant.value, {
+          nota: nota.value.trim() || "Entrada de bodega"
+        });
+        const cuanto = window.textoCantidad(cant.value);
+        const unidad = elegido ? elegido.unidad : "";
+        const nombre = elegido ? elegido.nombre : "el insumo";
+        cant.value = "1";
+        nota.value = "";
+        await cargar();
+        cerrar("entrada");
+        avisoEntrada("Se añadió bien: " + cuanto + " " + unidad + " de " + nombre + ". El stock de arriba ya lo incluye.");
+      } catch (err) {
+        msg.textContent = err.message || "No se pudo registrar la entrada.";
+        if (window.cuadro) cuadro("No se añadió", msg.textContent);
+      }
+      btn.disabled = false;
+    });
+
+    cargar().catch((err) => {
+      estado.textContent = err.message || "No se pudo cargar la bodega.";
+    });
+  </script>
 </body>
 </html>

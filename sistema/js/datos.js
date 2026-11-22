@@ -22,6 +22,20 @@ const COMPRAS_ZONA = {
   ]
 };
 
+/* Carta Gantt de Inicio: fechas reales del prototipo (MG / ME / RE). Año 2026. */
+const GANTT_OBRAS = [
+  { id: "sellado", pilar: "ME", nom: "Sellado ventanas piso 2", ini: "2026-04-01", fin: "2026-04-20", estado: "Hecho", href: "mejoras.html" },
+  { id: "radiadores", pilar: "MG", nom: "Radiadores hotel (presión de agua)", ini: "2026-03-16", fin: "2026-03-16", estado: "Hecho", href: "radiadores.html" },
+  { id: "graseras", pilar: "MG", nom: "Graseras / planta de tratamiento", ini: "2026-04-01", fin: "2026-04-01", estado: "Hecho", href: "fosas.html" },
+  { id: "poda", pilar: "ME", nom: "Poda de altura del predio", ini: "2026-07-01", fin: "2026-07-15", estado: "Hecho", href: "mejoras.html" },
+  { id: "h107", pilar: "RE", nom: "Hab. 107 — tapa WC", ini: "2026-09-22", fin: "2026-09-23", estado: "Hecho", href: "zona.html?z=107" },
+  { id: "reja", pilar: "ME", nom: "Pintar reja de acceso", ini: "2026-10-04", fin: "2026-10-06", estado: "Atrasada", href: "mejoras.html" },
+  { id: "h201", pilar: "RE", nom: "Hab. 201 — pintura", ini: "2026-10-01", fin: "2026-10-06", estado: "Por cerrar", href: "zona.html?z=201" },
+  { id: "caldera", pilar: "MG", nom: "Caldera ACV (visita externa)", ini: "2026-10-12", fin: "2026-10-12", estado: "Próxima", href: "maquinas.html" },
+  { id: "techos", pilar: "ME", nom: "Mantención techos hotel", ini: "2026-10-15", fin: "2026-10-31", estado: "Este mes", href: "mejoras.html" },
+  { id: "agua", pilar: "MG", nom: "Tratamiento agua potable", ini: "2026-10-01", fin: "2026-10-31", estado: "Mensual", href: "fosas.html" }
+];
+
 const HITOS_ZONA = {
   "107": [
     { hito: "Desarme sanitario", inicio: "2026-09-22", fin: "2026-09-22", estado: "Hecho" },
