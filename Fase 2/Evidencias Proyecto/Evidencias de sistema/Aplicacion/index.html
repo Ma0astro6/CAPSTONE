@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elalmendro Ecohotel — Acceso interno</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/estilos.css?v=12" />
+</head>
+<body>
+  <section class="login">
+    <div class="login-card">
+      <div class="logo-wrap">
+        <svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg" height="90"><g fill="none" stroke="#111" stroke-width="3"><circle cx="110" cy="22" r="14"/></g><text x="110" y="58" text-anchor="middle" font-family="Georgia, serif" font-size="22">Elalmendro</text><text x="110" y="78" text-anchor="middle" font-family="Calibri, sans-serif" font-size="12">ecohotel</text></svg>
+      </div>
+      <h1>Acceso interno</h1>
+      <p class="sub">Obras, mantención y mejora</p>
+      <p class="banner">El acceso se valida contra la base de datos (Supabase).</p>
+      <label for="u">Usuario o correo</label>
+      <input id="u" type="text" value="andres.cordero" autocomplete="username" />
+      <label for="p">Contraseña</label>
+      <div class="pass-wrap">
+        <input id="p" type="password" autocomplete="current-password" />
+        <button type="button" class="pass-toggle" id="btn-pass" onclick="togglePass()" aria-label="Mostrar contraseña" aria-pressed="false">Ver</button>
+      </div>
+      <div id="err" style="color:#8a3b22;min-height:18px;margin-top:8px"></div>
+      <button class="btn btn-full" type="button" id="btn-login" onclick="login()">Iniciar sesión</button>
+      <p class="muted-mini" style="margin-top:14px;text-align:center">
+        Admin: <b>andres.cordero</b> / andres2026<br />
+        Mantención: <b>mantencion</b> / mante2026
+      </p>
+    </div>
+  </section>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/app.js?v=12"></script>
+  <script>
+    (function () {
+      const s = getSesion();
+      if (s && s.id) window.location.href = "vistas/inicio.html";
+      document.getElementById("p").addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") login();
+      });
+      document.getElementById("u").addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") document.getElementById("p").focus();
+      });
+    })();
+  </script>
+</body>
+</html>

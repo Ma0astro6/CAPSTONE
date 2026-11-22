@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mejoras</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=18" />
+</head>
+<body>
+  <div id="shell">
+    <main class="main">
+      <p class="page-kicker">Mejoras</p>
+      <h2 class="page-title">Ideas, plan anual y proyectos</h2>
+      <p class="note">Las ideas se guardan en Supabase (<code>idea_mejora</code>). Después pasan a valorizar, plan anual o remodelación.</p>
+
+      <div class="kpi">
+        <div class="box"><span>Carpeta valorizada</span><b>$ 4.2M</b></div>
+        <div class="box"><span>Plan anual obras 2026</span><b>$ 1.5M</b></div>
+        <div class="box"><span>Ideas sin valorizar</span><b id="kpi-ideas">—</b></div>
+      </div>
+
+      <h3 style="margin:18px 0 8px">Por hacer (ideas)</h3>
+      <div class="work-wrap">
+        <div>
+          <div class="table-scroll">
+            <table class="data" id="tbl-ideas">
+              <thead>
+                <tr>
+                  <th>Idea</th>
+                  <th>Área</th>
+                  <th>Quién la propone</th>
+                  <th>Estado</th>
+                  <th>Pasa a</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="panel visita">
+          <h3>Nueva idea</h3>
+          <p class="muted-mini" id="idea-msg">Se graba en la base de datos. No entra al Gantt hasta el plan anual.</p>
+          <label for="i-titulo">Idea *</label>
+          <input id="i-titulo" type="text" placeholder="Ej. iluminación sendero cabañas" />
+          <label for="i-area">Área *</label>
+          <select id="i-area">
+            <option value="obras">Obras</option>
+            <option value="jardin">Jardín</option>
+            <option value="equipos">Equipos</option>
+          </select>
+          <label for="i-quien">Quién la propone *</label>
+          <input id="i-quien" type="text" placeholder="Andrés, Equipo, Mantención…" />
+          <label for="i-estado">Estado</label>
+          <select id="i-estado">
+            <option value="idea">Idea</option>
+            <option value="en_estudio">En estudio</option>
+            <option value="urgente">Urgente</option>
+          </select>
+          <label for="i-pasa">Pasa a</label>
+          <select id="i-pasa">
+            <option value="Valorizar">Valorizar</option>
+            <option value="Cotizar">Cotizar</option>
+            <option value="Plan anual obras">Plan anual obras</option>
+            <option value="Plan anual jardín">Plan anual jardín</option>
+            <option value="Remodelación / compra">Remodelación / compra</option>
+          </select>
+          <label for="i-nota">Nota (opcional)</label>
+          <textarea id="i-nota" rows="2" placeholder="Por qué importa o qué falta cotizar"></textarea>
+          <button class="btn btn-full" type="button" id="i-ok">Agregar idea</button>
+        </aside>
+      </div>
+
+      <h3 style="margin:22px 0 8px">Plan anual 2026 — obras</h3>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Mes</th>
+            <th>Costo est.</th>
+            <th>Estado</th>
+            <th>Gantt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pintar reja de acceso</td>
+            <td>Septiembre</td>
+            <td class="num">$ 180.000</td>
+            <td><span class="chip warn">En 5 días</span></td>
+            <td><a href="gantt.html">Ver</a></td>
+          </tr>
+          <tr>
+            <td>Mantención techos hotel</td>
+            <td>Marzo / octubre</td>
+            <td class="num">$ 420.000</td>
+            <td>Programada oct.</td>
+            <td><a href="gantt.html">Ver</a></td>
+          </tr>
+          <tr>
+            <td>Sellado ventanas piso 2</td>
+            <td>Abril</td>
+            <td class="num">$ 260.000</td>
+            <td><span class="chip ok">Hecho</span></td>
+            <td><a href="gantt.html">Ver</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:22px 0 8px">Plan anual 2026 — jardín</h3>
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Temporada</th>
+            <th>Costo est.</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Poda de altura predio</td>
+            <td>Invierno</td>
+            <td class="num">$ 350.000</td>
+            <td><span class="chip ok">Hecho jul-2026</span></td>
+          </tr>
+          <tr>
+            <td>Reposición plantas acceso</td>
+            <td>Primavera</td>
+            <td class="num">$ 220.000</td>
+            <td>Por ejecutar</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:22px 0 8px">Proyectos valorizados (carpeta jefes)</h3>
+      <div class="mini-tiles">
+        <div class="mini t-mej"><div class="code">PE</div><b>Pérgola jardín</b><small>$1.500.000 · materiales + mano de obra</small><span class="badge">CARPETA</span></div>
+        <div class="mini t-jar"><div class="code">PA</div><b>Zona parrilla</b><small>$900.000 · aún idea con cifra gruesa</small><span class="badge">FUTURO</span></div>
+        <div class="mini t-man"><div class="code">AR</div><b>Línea de árboles</b><small>$800.000 · entrada eventos</small><span class="badge">FUTURO</span></div>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/app.js?v=11"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mejoras", href:"mejoras.html"}], { agenda: false });
+
+    const AREA_LABEL = { obras: "Obras", jardin: "Jardín", equipos: "Equipos" };
+    const ESTADO_LABEL = { idea: "Idea", en_estudio: "En estudio", urgente: "Urgente", valorizada: "Valorizada", descartada: "Descartada" };
+
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function chipEstado(estado) {
+      if (estado === "urgente") return '<span class="chip warn">Urgente</span>';
+      if (estado === "en_estudio") return '<span class="chip">En estudio</span>';
+      return '<span class="chip">' + esc(ESTADO_LABEL[estado] || estado) + "</span>";
+    }
+
+    const tbody = document.querySelector("#tbl-ideas tbody");
+    const kpi = document.getElementById("kpi-ideas");
+    const msg = document.getElementById("idea-msg");
+    let ideas = [];
+
+    function pintar() {
+      kpi.textContent = String(ideas.length);
+      tbody.innerHTML = ideas.map((i) => `
+        <tr>
+          <td>${esc(i.titulo)}${i.notas ? "<br><small class='muted-mini'>" + esc(i.notas) + "</small>" : ""}</td>
+          <td>${esc(AREA_LABEL[i.area] || i.area)}</td>
+          <td>${esc(i.proponente || "—")}</td>
+          <td>${chipEstado(i.estado)}</td>
+          <td>${esc(i.pasa_a || "—")}</td>
+        </tr>`).join("") || "<tr><td colspan='5'>Aún no hay ideas en la BD.</td></tr>";
+    }
+
+    async function cargar() {
+      if (!window.db) {
+        msg.textContent = "No hay conexión a Supabase (revisa config.js).";
+        return;
+      }
+      msg.textContent = "Cargando ideas desde la base…";
+      const { data, error } = await db
+        .from("idea_mejora")
+        .select("id, titulo, area, proponente, estado, pasa_a, notas, fecha")
+        .order("id", { ascending: false });
+      if (error) {
+        msg.textContent = "Error al leer: " + error.message;
+        console.error(error);
+        return;
+      }
+      ideas = data || [];
+      pintar();
+      msg.textContent = "Conectado a Supabase · " + ideas.length + " ideas.";
+    }
+
+    function limpiar() {
+      document.getElementById("i-titulo").value = "";
+      document.getElementById("i-area").value = "obras";
+      document.getElementById("i-quien").value = "";
+      document.getElementById("i-estado").value = "idea";
+      document.getElementById("i-pasa").value = "Valorizar";
+      document.getElementById("i-nota").value = "";
+    }
+
+    document.getElementById("i-ok").addEventListener("click", async () => {
+      const titulo = document.getElementById("i-titulo").value.trim();
+      const area = document.getElementById("i-area").value;
+      const proponente = document.getElementById("i-quien").value.trim();
+      const estado = document.getElementById("i-estado").value;
+      const pasa_a = document.getElementById("i-pasa").value;
+      const notas = document.getElementById("i-nota").value.trim() || null;
+      if (!titulo || !proponente) {
+        msg.textContent = "Faltan la idea o quién la propone.";
+        return;
+      }
+      if (!window.db) {
+        msg.textContent = "No hay conexión a Supabase.";
+        return;
+      }
+      msg.textContent = "Guardando…";
+      const { data, error } = await db
+        .from("idea_mejora")
+        .insert([{ titulo, area, proponente, estado, pasa_a, notas }])
+        .select("id, titulo, area, proponente, estado, pasa_a, notas, fecha")
+        .single();
+      if (error) {
+        msg.textContent = "Error al guardar: " + error.message;
+        console.error(error);
+        return;
+      }
+      ideas.unshift(data);
+      limpiar();
+      pintar();
+      msg.innerHTML = "Idea guardada en BD: <b>" + esc(titulo) + "</b>.";
+    });
+
+    cargar();
+  </script>
+</body>
+</html>

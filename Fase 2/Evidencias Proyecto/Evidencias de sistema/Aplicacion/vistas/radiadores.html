@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Radiadores</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css?v=18" />
+</head>
+<body>
+  <div id="shell"><main class="main"></main></div>
+  <script src="../js/datos-mg.js"></script>
+  <script src="../js/app.js?v=11"></script>
+  <script src="../js/catalogo.js?v=11"></script>
+  <script>
+    mount([{label:"Inicio", href:"inicio.html"},{label:"Mantención", href:"mantencion.html"},{label:"Radiadores", href:"radiadores.html"}], { agenda: false });
+    catalogo({
+      title: "Radiadores",
+      extra: tabsEquipos("radiadores.html"),
+      note: "Elige una fila para una visita nueva (el formulario queda vacío). Modificar no usa ese recuadro: abre una ventana.",
+      rows: MG.radiadores,
+      filterKey: "ubicacion",
+      filterAll: "Todas las ubicaciones",
+      searchPlaceholder: "Buscar habitación",
+      searchKeys: ["zona", "ubicacion", "quien", "detalle"],
+      pickLabel: (r) => r.zona,
+      nameKey: "zona",
+      editKeys: ["zona", "ubicacion", "proveedor"],
+      cols: [
+        { key: "zona", label: "Zona" },
+        { key: "ubicacion", label: "Ubicación" },
+        { key: "proveedor", label: "Proveedor" },
+        { key: "ultima", label: "Última", chip: true, warnEmpty: true },
+        { key: "quien", label: "Quién" }
+      ]
+    });
+  </script>
+</body>
+</html>
