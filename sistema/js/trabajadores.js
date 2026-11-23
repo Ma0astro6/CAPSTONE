@@ -136,7 +136,11 @@
       '<div><label>Empresa</label><select id="ficha-empresa"><option value="">Sin empresa</option>' + ops + "</select></div>" +
       "</div>" +
       '<label class="muted-mini"><input id="ficha-activo" type="checkbox"' + (t.activo ? " checked" : "") + "> Sigue en el hotel</label>" +
-      '<button class="btn" type="button" id="ficha-guardar" style="margin-top:10px">Guardar datos</button></section>' +
+      '<button class="btn" type="button" id="ficha-guardar" style="margin-top:10px">Guardar datos</button>' +
+      (t.activo
+        ? '<button class="btn" type="button" id="ficha-baja" style="margin-top:10px;margin-left:8px;background:#8a3b2a">Desvincular</button>'
+        : '<button class="btn" type="button" id="ficha-alta" style="margin-top:10px;margin-left:8px">Volver a vincular</button>') +
+      "</section>" +
       '<div class="trab-bloques">' +
       '<section class="trab-bloque"><h3>EPP y ropa</h3>' +
       '<p class="muted-mini">Solo la entrega. No sube un papel.</p>' + filasEntrega(t.id) +
@@ -185,6 +189,10 @@
     });
     const guardar = document.getElementById("ficha-guardar");
     if (guardar) guardar.onclick = guardarDatos;
+    const baja = document.getElementById("ficha-baja");
+    if (baja) baja.onclick = () => pedirQuitar("persona", elegido);
+    const alta = document.getElementById("ficha-alta");
+    if (alta) alta.onclick = vincularDeNuevo;
     const fe = document.getElementById("form-entrega");
     if (fe) fe.onsubmit = anotarEntrega;
     const fc = document.getElementById("form-charla");
@@ -246,6 +254,16 @@
     await cargar();
     pintar();
     aviso("Datos guardados", t.nombre + " quedó actualizado.");
+  }
+
+  async function vincularDeNuevo() {
+    const t = gente.find((x) => x.id === elegido);
+    if (!t) return;
+    const up = await window.db.from("trabajador").update({ activo: true }).eq("id", t.id);
+    if (up.error) { aviso("No se guardó", up.error.message); return; }
+    await cargar();
+    pintar();
+    aviso("Vinculado", t.nombre + " vuelve a figurar en el hotel.");
   }
 
   async function anotarEntrega(ev) {
@@ -322,8 +340,12 @@
 
   function pedirQuitar(tipo, id) {
     quitando = { tipo, id };
+    const persona = gente.find((x) => x.id === id);
     const nombres = { entrega: "esta entrega", charla: "esta charla", archivo: "este papel" };
-    document.getElementById("quitar-texto").textContent = "Se saca " + (nombres[tipo] || "esto") + " de la ficha.";
+    document.getElementById("quitar-texto").textContent = tipo === "persona"
+      ? "Se desvincula a " + (persona ? persona.nombre : "esta persona") + ". Deja de figurar como personal del hotel. Las visitas que ya hizo se conservan."
+      : "Se saca " + (nombres[tipo] || "esto") + " de la ficha.";
+    document.getElementById("quitar-si").textContent = tipo === "persona" ? "Sí, desvincular" : "Sí, quitar";
     document.getElementById("quitar-modal").hidden = false;
   }
 
@@ -332,6 +354,15 @@
     const { tipo, id } = quitando;
     document.getElementById("quitar-modal").hidden = true;
     quitando = null;
+    if (tipo === "persona") {
+      const persona = gente.find((x) => x.id === id);
+      const up = await window.db.from("trabajador").update({ activo: false }).eq("id", id);
+      if (up.error) { aviso("No se guardó", up.error.message); return; }
+      await cargar();
+      pintar();
+      aviso("Desvinculado", (persona ? persona.nombre : "La persona") + " ya no figura como personal del hotel.");
+      return;
+    }
     if (tipo === "archivo") {
       const row = archivos.find((a) => a.id === id);
       if (row) await window.db.storage.from("trabajadores").remove([row.ruta]);

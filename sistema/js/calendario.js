@@ -218,7 +218,7 @@
       <div class="aviso-mant-grid">
         ${lista.map((it) => {
           const n = diffDias(it.fecha, hoy);
-          const tono = n < 0 ? "atrasada" : claseGrupo(it.grupo);
+          const tono = n < 0 ? "u-atras" : (n <= 7 ? "u-cerca" : (n <= 31 ? "u-media" : "u-lejos"));
           return `<button type="button" class="aviso-mant-card ${tono}" data-agenda="${marcarDetalle(it)}">
             <span>${esc(etiqueta(it.fecha, hoy))}</span>
             <b>${esc(it.nombre)}</b>
@@ -318,7 +318,8 @@
           celda.classList.add(n < 0 ? "atras" : n <= 7 ? "cerca" : "media");
           const a = document.createElement("button");
           a.type = "button";
-          a.className = "semana-item g-" + claseGrupo(it.grupo);
+          const urg = n < 0 ? "u-atras" : (n === 0 ? "u-hoy" : (n <= 7 ? "u-cerca" : (n <= 31 ? "u-media" : "u-lejos")));
+          a.className = "semana-item " + urg;
           a.setAttribute("data-agenda", marcarDetalle(it));
           a.textContent = it.motivo === "por_hacer" ? it.nombre + " · por hacer" : it.nombre;
           celda.appendChild(a);

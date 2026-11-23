@@ -25,6 +25,7 @@ function clearSesion() {
   sessionStorage.removeItem("PERMISOS");
   sessionStorage.removeItem("INICIO_BOTONES");
   sessionStorage.removeItem("AVISO_ENTRADA");
+  sessionStorage.removeItem("PILA_VISTAS");
 }
 
 function rolLabel(rol, nombre) {
@@ -286,22 +287,32 @@ function crumbHTML(items) {
   return `<nav class="crumb">${back}<span class="crumb-trail">${trail}</span></nav>`;
 }
 
+function registrarVista() {
+  const actual = paginaActual() + location.search;
+  if (!actual || actual === "index.html") return;
+  let pila = [];
+  try { pila = JSON.parse(sessionStorage.getItem("PILA_VISTAS") || "[]"); } catch (e) { pila = []; }
+  if (!Array.isArray(pila)) pila = [];
+  const i = pila.findIndex((p) => String(p).split("?")[0] === paginaActual());
+  if (i >= 0) pila = pila.slice(0, i);
+  pila.push(actual);
+  if (pila.length > 12) pila = pila.slice(pila.length - 12);
+  sessionStorage.setItem("PILA_VISTAS", JSON.stringify(pila));
+}
+
 function bindRegresar() {
   const a = document.querySelector("[data-regresar]");
   if (!a) return;
   a.addEventListener("click", (ev) => {
     ev.preventDefault();
     const fallback = a.getAttribute("href") || "inicio.html";
-    try {
-      if (document.referrer) {
-        const u = new URL(document.referrer);
-        const page = decodeURIComponent((u.pathname.split("/").pop() || "").split("?")[0]);
-        if (u.origin === location.origin && page && page !== paginaActual() && puedeAbrirHref(page) && u.pathname.includes("/vistas/")) {
-          location.href = page + u.search;
-          return;
-        }
-      }
-    } catch (e) {}
+    let pila = [];
+    try { pila = JSON.parse(sessionStorage.getItem("PILA_VISTAS") || "[]"); } catch (e) { pila = []; }
+    const prev = Array.isArray(pila) && pila.length >= 2 ? pila[pila.length - 2] : "";
+    if (prev && puedeAbrirHref(prev)) {
+      location.href = prev;
+      return;
+    }
     location.href = fallback;
   });
 }
@@ -450,38 +461,75 @@ async function cargarVisitasCarta() {
   window.PENDIENTES_VISITA = window.PENDIENTES_VISITA || [];
   if (!window.db) return;
   const anio = new Date().getFullYear();
+  const desde = anio + "-01-01";
+  const hasta = anio + "-12-31";
   const q = await window.db.from("visita").select(
-    "id, fecha, detalle, estado, trabajador(nombre), activo(nombre, ubicacion_det, zona(nombre), categoria_activo(grupo))"
-  ).gte("fecha", anio + "-01-01").lte("fecha", anio + "-12-31").order("fecha", { ascending: false }).limit(80);
+    "id, fecha, proxima_fecha, detalle, estado, trabajador(nombre), activo(nombre, ubicacion_det, zona(nombre), categoria_activo(grupo)), tarea(nombre, tipo, zona(nombre))"
+  ).gte("fecha", desde).lte("fecha", hasta).order("fecha");
   if (q.error) throw new Error(q.error.message);
   const hoy = hoyISO();
   const carta = [];
   const pendientes = [];
+  const vistos = new Set();
+  function poner(item) {
+    const clave = item.nom + "|" + item.ini;
+    if (vistos.has(clave)) return;
+    vistos.add(clave);
+    carta.push(item);
+    if (item.estado !== "Hecho" && item.ini <= hoy) pendientes.push(item);
+  }
   (q.data || []).forEach((v) => {
-    if (!v.activo || !v.fecha) return;
-    const lugar = (v.activo.zona && v.activo.zona.nombre) || v.activo.ubicacion_det || "";
-    const grupo = (v.activo.categoria_activo && v.activo.categoria_activo.grupo) || "";
-    const item = {
-      id: "vis-" + v.id,
+    const act = v.activo;
+    const tar = v.tarea;
+    if (!v.fecha || (!act && !tar)) return;
+    const grupo = (act && act.categoria_activo && act.categoria_activo.grupo)
+      || (tar && tar.tipo === "prevencion" ? "Prevención" : tar ? "Jardín" : "");
+    const base = {
       visitaId: v.id,
       pilar: "MG",
-      nom: v.activo.nombre,
-      ini: v.fecha,
-      fin: v.fecha,
-      estado: v.estado === "terminada" ? "Hecho" : (v.fecha < hoy ? "Atrasada" : "Por hacer"),
+      nom: (act && act.nombre) || (tar && tar.nombre) || "Mantención",
       href: "calendario.html",
       quien: (v.trabajador && v.trabajador.nombre) || "",
-      lugar,
+      lugar: (act && ((act.zona && act.zona.nombre) || act.ubicacion_det)) || (tar && tar.zona && tar.zona.nombre) || "",
       detalle: v.detalle || "",
       grupo
     };
-    carta.push(item);
-    if (v.estado === "por_hacer" && v.fecha <= hoy) pendientes.push(item);
+    poner(Object.assign({}, base, {
+      id: "vis-" + v.id,
+      ini: v.fecha,
+      fin: v.fecha,
+      estado: v.estado === "terminada" ? "Hecho" : (v.fecha < hoy ? "Atrasada" : "Por hacer")
+    }));
+    const prox = v.proxima_fecha ? String(v.proxima_fecha).slice(0, 10) : "";
+    if (prox && prox.slice(0, 4) === String(anio) && prox !== String(v.fecha).slice(0, 10)) {
+      poner(Object.assign({}, base, {
+        id: "prox-" + v.id,
+        ini: prox,
+        fin: prox,
+        estado: prox < hoy ? "Atrasada" : "Por hacer",
+        quien: "Próxima visita"
+      }));
+    }
   });
   const abiertas = carta.filter((it) => it.estado !== "Hecho");
-  const hechas = carta.filter((it) => it.estado === "Hecho").slice(0, 15);
+  const hechas = carta.filter((it) => it.estado === "Hecho")
+    .sort((a, b) => String(b.ini).localeCompare(String(a.ini)))
+    .slice(0, 20);
   window.VISITAS_CARTA = abiertas.concat(hechas);
   window.PENDIENTES_VISITA = pendientes;
+  window.PENDIENTES_PREV = [];
+  const prevQ = await window.db.from("tarea")
+    .select("id, nombre, fecha_fin")
+    .eq("tipo", "prevencion")
+    .lte("fecha_fin", hoy)
+    .not("estado", "in", "(hecha,cancelada)");
+  if (!prevQ.error) {
+    window.PENDIENTES_PREV = (prevQ.data || []).filter((t) => t.fecha_fin).map((t) => ({
+      id: t.id,
+      nom: t.nombre,
+      fin: String(t.fecha_fin).slice(0, 10)
+    }));
+  }
 }
 
 async function cerrarVisita(id, estado, extra) {
@@ -500,6 +548,38 @@ async function cerrarVisita(id, estado, extra) {
     cuadro(
       estado === "terminada" ? "Quedó hecho" : "Quedó pendiente",
       estado === "terminada" ? "Salió del cierre de hoy." : "Se retoma el " + (proxima || "otro día") + "."
+    );
+  }
+  try { await cargarVisitasCarta(); } catch (e) { /* el cierre igual se reescribe */ }
+  renderAgenda();
+  if (typeof pintarAvisosEnInicio === "function") pintarAvisosEnInicio();
+}
+
+async function cerrarTarea(id, estado, extra) {
+  if (!window.db) return;
+  const proxima = (extra && extra.proxima) || "";
+  const patch = { estado: estado === "hecha" ? "hecha" : "pendiente" };
+  if (estado !== "hecha" && proxima) {
+    const actual = await window.db.from("tarea").select("fecha_inicio").eq("id", Number(id)).maybeSingle();
+    const ini = actual.data && actual.data.fecha_inicio ? String(actual.data.fecha_inicio).slice(0, 10) : "";
+    if (ini && proxima < ini) {
+      if (window.cuadro) cuadro("Revisa las fechas", "La nueva fecha no puede ser anterior al inicio de la capacitación.");
+      return;
+    }
+    patch.fecha_fin = proxima;
+  }
+  const up = await window.db.from("tarea").update(patch).eq("id", Number(id));
+  if (up.error) {
+    if (window.cuadro) cuadro("No se guardó", up.error.message);
+    return;
+  }
+  const nombre = (window.PENDIENTES_PREV || []).find((t) => String(t.id) === String(id));
+  if (window.cuadro) {
+    cuadro(
+      estado === "hecha" ? "Quedó hecho" : "Quedó pendiente",
+      estado === "hecha"
+        ? (nombre ? nombre.nom : "La capacitación") + " salió de lo que se acerca."
+        : "Se retoma el " + (proxima || "otro día") + "."
     );
   }
   try { await cargarVisitasCarta(); } catch (e) { /* el cierre igual se reescribe */ }
@@ -555,7 +635,7 @@ function pizarraHTML() {
     <section class="pizarra" aria-label="Próximos 7 días">
       <div class="agenda-head">
         <p class="pizarra-titulo">Próximos 7 días</p>
-        <span class="agenda-rango">Del ${desde} al ${hasta} · equipos, predio, jardín, piezas y prevención</span>
+        <span class="agenda-rango">Del ${desde} al ${hasta} · verde esta semana · amarillo este mes · rojo atrasada</span>
       </div>
       <div class="semana">
         ${dias.map((d) => `
@@ -582,7 +662,8 @@ function cierreHTML() {
       return { ...it, ...map[id] };
     });
   const visitas = (window.PENDIENTES_VISITA || []).slice(0, 12);
-  const n = abiertas.length + visitas.length;
+  const prevs = window.PENDIENTES_PREV || [];
+  const n = abiertas.length + visitas.length + prevs.length;
   const tarjetas = abiertas.map((it) => `
         <article class="cierre-card" data-id="${it.id}">
           <div>
@@ -605,6 +686,16 @@ function cierreHTML() {
           <div class="cierre-actions">
             <button type="button" class="btn btn-mini btn-mini-gold" data-visita-accion="hecho">Se hizo</button>
             <button type="button" class="btn btn-mini" data-visita-accion="pendiente">Quedó pendiente</button>
+          </div>
+        </article>`)).concat(prevs.map((it) => `
+        <article class="cierre-card" data-tarea="${it.id}">
+          <div>
+            <b>${escTarea(it.nom)}</b>
+            <small>Prevención · ${ganttFmt(it.fin)} · capacitación</small>
+          </div>
+          <div class="cierre-actions">
+            <button type="button" class="btn btn-mini btn-mini-gold" data-tarea-accion="hecho">Se hizo</button>
+            <button type="button" class="btn btn-mini" data-tarea-accion="pendiente">Quedó pendiente</button>
           </div>
         </article>`)).join("");
   return `
@@ -654,6 +745,7 @@ function ganttFmt(iso) {
 function ramaGantt(it) {
   const texto = (String(it.grupo || "") + " " + String(it.nom || "") + " " + String(it.href || "")).toLowerCase();
   if (it.pilar !== "MG") return "";
+  if (/prevenc/.test(texto)) return "Prevención";
   if (/predio|fosa|jardin|jardín|agua|graser/.test(texto)) return "Predio";
   if (/habit|baño|bano|puerta|pila|tv/.test(texto)) return "Habitaciones";
   return "Equipos";
@@ -692,14 +784,26 @@ function ganttAbierto(id) {
   return !!(window.GANTT_ABIERTO && window.GANTT_ABIERTO[id]);
 }
 
-function repintarGantt() {
-  if (document.getElementById("agenda-host")) {
-    renderAgenda();
-    if (typeof pintarAvisosEnInicio === "function") pintarAvisosEnInicio();
-    return;
+function repintarGantt(ancla) {
+  const id = ancla && ancla.getAttribute ? ancla.getAttribute("data-gantt-toggle") : "";
+  const top = ancla && ancla.getBoundingClientRect ? ancla.getBoundingClientRect().top : null;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  const html = ganttHTML();
+  const board = document.querySelector(".gantt-board");
+  if (board) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    if (tmp.firstElementChild) board.replaceWith(tmp.firstElementChild);
+  } else {
+    const host = document.getElementById("gantt-host");
+    if (host) host.innerHTML = html;
   }
-  const host = document.getElementById("gantt-host");
-  if (host) host.innerHTML = ganttHTML();
+  if (!id || top == null) return;
+  const sel = window.CSS && CSS.escape ? CSS.escape(id) : id;
+  const nuevo = document.querySelector('[data-gantt-toggle="' + sel + '"]');
+  if (!nuevo) return;
+  const delta = nuevo.getBoundingClientRect().top - top;
+  if (Math.abs(delta) > 1) window.scrollBy(0, delta);
 }
 
 function ganttHTML() {
@@ -714,20 +818,29 @@ function ganttHTML() {
     .map((it) => medidasGantt({ ...it, color: colores[it.pilar] || "#2a6f8a", rama: ramaGantt(it) }))
     .sort((a, b) => String(a.ini).localeCompare(String(b.ini)));
   const pilares = [
-    { id: "MG", nombre: "Mantención general", color: colores.MG, ramas: ["Equipos", "Predio", "Habitaciones"] },
+    { id: "MG", nombre: "Mantención general", color: colores.MG, ramas: ["Equipos", "Predio", "Habitaciones", "Prevención"] },
     { id: "ME", nombre: "Mejoras", color: colores.ME, ramas: [] },
     { id: "RE", nombre: "Remodelaciones", color: colores.RE, ramas: [] }
   ];
-  const bloqueFilas = (lista) => lista.length
-    ? ejeGantt(meses, hoyPct) + lista.map((f) => filaGantt(f, hoyPct)).join("")
-    : `<p class="muted-mini">Nada en este grupo.</p>`;
+  const bloqueFilas = (lista) => {
+    const orden = lista.slice().sort((a, b) => {
+      const ah = a.estado === "Hecho" ? 1 : 0;
+      const bh = b.estado === "Hecho" ? 1 : 0;
+      if (ah !== bh) return ah - bh;
+      return String(b.ini).localeCompare(String(a.ini));
+    });
+    return orden.length
+      ? ejeGantt(meses, hoyPct) + orden.map((f) => filaGantt(f, hoyPct)).join("")
+      : `<p class="muted-mini">Nada en este grupo.</p>`;
+  };
   const cuerpo = (p) => {
     const suyos = items.filter((it) => it.pilar === p.id);
     if (!p.ramas.length) return `<div class="gantt-cuerpo">${bloqueFilas(suyos)}</div>`;
     return `<div class="gantt-cuerpo">${p.ramas.map((rama) => {
       const id = p.id + ":" + rama;
-      const abierto = ganttAbierto(id);
       const lista = suyos.filter((it) => it.rama === rama);
+      if (!lista.length) return "";
+      const abierto = ganttAbierto(id);
       return `<section class="gantt-rama${abierto ? " abierto" : ""}">
         <button type="button" class="gantt-rama-btn" data-gantt-toggle="${escTarea(id)}">
           <b>${escTarea(rama)}</b><small>${lista.length}</small><span class="gantt-flecha"></span>
@@ -830,6 +943,23 @@ function bindCierre() {
     });
   }
   board.addEventListener("click", (ev) => {
+    const tbtn = ev.target.closest("[data-tarea-accion]");
+    if (tbtn) {
+      const tcard = tbtn.closest("[data-tarea]");
+      const tid = tcard && tcard.getAttribute("data-tarea");
+      if (!tid) return;
+      if (tbtn.getAttribute("data-tarea-accion") === "hecho") {
+        cerrarTarea(tid, "hecha", {});
+        return;
+      }
+      if (!modal) return;
+      modal.dataset.modo = "tarea";
+      document.getElementById("cierre-id").value = tid;
+      document.getElementById("cierre-prox").value = isoMasDias(hoyISO(), 1);
+      document.getElementById("cierre-nota").value = "";
+      modal.hidden = false;
+      return;
+    }
     const vbtn = ev.target.closest("[data-visita-accion]");
     if (vbtn) {
       const vcard = vbtn.closest("[data-visita]");
@@ -874,6 +1004,7 @@ function bindCierre() {
     const modo = modal.dataset.modo || "gantt";
     modal.hidden = true;
     if (modo === "visita") cerrarVisita(id, "por_hacer", { proxima, nota });
+    else if (modo === "tarea") cerrarTarea(id, "pendiente", { proxima, nota });
     else registrarCierre(id, "Pendiente", { proxima, nota });
   };
 }
@@ -985,7 +1116,7 @@ function bindDetalleTarea() {
       const id = tog.getAttribute("data-gantt-toggle");
       window.GANTT_ABIERTO = window.GANTT_ABIERTO || {};
       window.GANTT_ABIERTO[id] = !window.GANTT_ABIERTO[id];
-      repintarGantt();
+      repintarGantt(tog);
       return;
     }
     const gantt = ev.target.closest("[data-gantt]");
@@ -1058,6 +1189,7 @@ function mount(crumbs, opts) {
     window.location.href = "inicio.html";
     return;
   }
+  registrarVista();
   applyCierreToGantt();
   host.insertAdjacentHTML("afterbegin", headerHTML(sesion, crumbs) + crumbHTML(crumbs));
   bindMenu();

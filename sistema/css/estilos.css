@@ -593,11 +593,10 @@ a.tile.tile-bodega p { margin: 0; max-width: none; font-size: 14px; }
   border-radius: 8px;
   padding: 6px;
 }
-.semana-item.g-equipo { background: #e7f3f8; }
-.semana-item.g-predio { background: #e5f2e6; }
-.semana-item.g-hab { background: #f6e7c3; }
-.semana-item.g-jardin { background: #dcecc4; }
-.semana-item.g-prev { background: #efe6f6; }
+.semana-item.u-atras { background: #c45c3a; color: #fff; }
+.semana-item.u-hoy, .semana-item.u-cerca { background: #2f7d46; color: #f4ead8; }
+.semana-item.u-media { background: #e7c56a; color: #143028; }
+.semana-item.u-lejos { background: #d7e4ea; color: #143028; }
 .posit {
   min-height: 168px;
   width: auto;
@@ -1181,8 +1180,15 @@ input:focus, textarea:focus, select:focus {
 .aviso-mant-card.jardin span { color: #2d6b3c; }
 .aviso-mant-card.prev { background: #efe6f6; }
 .aviso-mant-card.prev span { color: #5a3d78; }
-.aviso-mant-card.atrasada { background: #fbf0cc; }
-.aviso-mant-card.atrasada span { color: #8a3a12; }
+.aviso-mant-card.u-atras { background: #c45c3a; color: #fff; }
+.aviso-mant-card.u-atras span, .aviso-mant-card.u-atras small { color: #fff; }
+.aviso-mant-card.u-cerca, .aviso-mant-card.u-hoy { background: #2f7d46; color: #f4ead8; }
+.aviso-mant-card.u-cerca span, .aviso-mant-card.u-cerca small,
+.aviso-mant-card.u-hoy span, .aviso-mant-card.u-hoy small { color: #f4ead8; }
+.aviso-mant-card.u-media { background: #e7c56a; color: #143028; }
+.aviso-mant-card.u-media span { color: #6a4a12; }
+.aviso-mant-card.u-lejos { background: #d7e4ea; color: #143028; }
+.aviso-mant-card.u-lejos span { color: #1d5870; }
 .aviso-mant .agenda-rango a { color: var(--header); font-weight: 700; }
 
 .cal-board {
@@ -1694,6 +1700,7 @@ input:focus, textarea:focus, select:focus {
   box-shadow: var(--shadow), inset 0 0 0 1px rgba(196, 163, 90, 0.14);
   padding: 18px 20px 20px;
   overflow: hidden;
+  overflow-anchor: none;
 }
 .gantt-axis {
   display: grid;
