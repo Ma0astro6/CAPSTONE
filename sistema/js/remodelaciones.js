@@ -347,7 +347,7 @@
           const tipo = document.getElementById("obra-tipo").value;
           const inicio = document.getElementById("obra-inicio").value || null;
           const fin = document.getElementById("obra-fin").value || null;
-          const presupuesto = document.getElementById("obra-presupuesto").value.trim();
+          const presupuesto = window.leerMonto ? leerMonto(document.getElementById("obra-presupuesto").value) : null;
           const notas = document.getElementById("obra-notas").value.trim();
           if (!nombre) {
             msg.textContent = "Falta el nombre de la obra.";
@@ -372,7 +372,7 @@
             estado: "en_curso",
             fecha_inicio: inicio,
             fecha_fin_plan: fin,
-            presupuesto: presupuesto ? Math.round(Number(presupuesto)) : null,
+            presupuesto: presupuesto == null ? null : presupuesto,
             notas: notas || null
           }).select("id").single();
           if (ins.error) {
@@ -491,7 +491,7 @@
         const nuevo = document.getElementById("compra-nuevo").value.trim();
         const provSel = selProv.value;
         const cantidad = Number(document.getElementById("compra-cant").value);
-        const neto = Number(document.getElementById("compra-neto").value);
+        const neto = window.leerMonto ? leerMonto(document.getElementById("compra-neto").value) : Number(document.getElementById("compra-neto").value);
         const estado = document.getElementById("compra-estado").value;
         if (!item) {
           msg.textContent = "Falta el ítem.";

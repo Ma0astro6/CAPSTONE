@@ -238,6 +238,85 @@ async function pintarBotonesInicio() {
   aplicarMenus();
 }
 
+const CUADROS_ABRE = {
+  "mantencion.html": "t-man",
+  "mejoras.html": "t-mej",
+  "remodelaciones.html": "t-rem"
+};
+
+function cuadroDestino(a) {
+  if (!a || !a.classList || !a.classList.contains("tile")) return "";
+  const href = (a.getAttribute("href") || "").split("?")[0].split("#")[0].split("/").pop();
+  return CUADROS_ABRE[href] || "";
+}
+
+let cuadroYendo = false;
+function abrirCuadroPantalla(a, tono) {
+  if (cuadroYendo || document.querySelector(".tile-abre")) return;
+  const r = a.getBoundingClientRect();
+  if (r.width < 8 || r.height < 8) {
+    location.href = a.href;
+    return;
+  }
+  cuadroYendo = true;
+  const capa = document.createElement("div");
+  capa.className = "tile-abre " + tono;
+  capa.innerHTML = a.innerHTML;
+  capa.style.top = r.top + "px";
+  capa.style.left = r.left + "px";
+  capa.style.width = r.width + "px";
+  capa.style.height = r.height + "px";
+  capa.style.borderRadius = "18px";
+  capa.style.padding = "18px 16px";
+  document.body.appendChild(capa);
+  document.body.style.overflow = "hidden";
+  a.style.visibility = "hidden";
+  let anim;
+  try {
+    anim = capa.animate([
+      {
+        top: r.top + "px",
+        left: r.left + "px",
+        width: r.width + "px",
+        height: r.height + "px",
+        borderRadius: "18px",
+        padding: "18px 16px"
+      },
+      {
+        top: "0px",
+        left: "0px",
+        width: "100vw",
+        height: "100vh",
+        borderRadius: "0px",
+        padding: "72px 64px"
+      }
+    ], { duration: 520, easing: "cubic-bezier(.22, .82, .2, 1)", fill: "forwards" });
+  } catch (e) {
+    try { sessionStorage.setItem("CUADRO_ABRE", tono); } catch (err) {}
+    location.href = a.href;
+    return;
+  }
+  requestAnimationFrame(() => capa.classList.add("crece"));
+  const ir = () => {
+    if (capa.dataset.listo) return;
+    capa.dataset.listo = "1";
+    try { sessionStorage.setItem("CUADRO_ABRE", tono); } catch (e) {}
+    location.href = a.href;
+  };
+  anim.onfinish = ir;
+  setTimeout(ir, 800);
+}
+
+document.addEventListener("click", (ev) => {
+  if (ev.defaultPrevented || ev.button || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+  const a = ev.target.closest && ev.target.closest("a.tile");
+  const tono = cuadroDestino(a);
+  if (!tono) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  ev.preventDefault();
+  abrirCuadroPantalla(a, tono);
+});
+
 function aplicarMenus() {
   document.querySelectorAll("[data-menu]").forEach((el) => {
     const codigo = el.getAttribute("data-menu");
@@ -1209,7 +1288,57 @@ function mount(crumbs, opts) {
       });
   }
   aplicarMenus();
+  bindMontos();
 }
+
+function leerMonto(valor) {
+  const limpio = String(valor == null ? "" : valor).replace(/\D/g, "");
+  if (!limpio) return null;
+  return Number(limpio);
+}
+
+function textoMonto(valor) {
+  const n = leerMonto(valor);
+  if (n == null) return "";
+  return n.toLocaleString("es-CL");
+}
+
+function formatearCampoMonto(input) {
+  const antes = input.selectionStart;
+  const digitosAntes = String(input.value.slice(0, antes == null ? input.value.length : antes)).replace(/\D/g, "").length;
+  const siguiente = textoMonto(input.value);
+  if (input.value === siguiente) return;
+  input.value = siguiente;
+  if (antes == null || document.activeElement !== input || !input.setSelectionRange) return;
+  let vistos = 0;
+  let pos = siguiente.length;
+  for (let i = 0; i < siguiente.length; i++) {
+    if (/\d/.test(siguiente[i])) vistos++;
+    if (vistos >= digitosAntes) {
+      pos = i + 1;
+      break;
+    }
+  }
+  if (!digitosAntes) pos = 0;
+  input.setSelectionRange(pos, pos);
+}
+
+function bindMontos(raiz) {
+  const base = raiz && raiz.querySelectorAll ? raiz : document;
+  base.querySelectorAll("[data-monto]").forEach((input) => {
+    if (input.value) formatearCampoMonto(input);
+  });
+}
+
+document.addEventListener("input", (ev) => {
+  const input = ev.target;
+  if (!input || !input.matches || !input.matches("[data-monto]")) return;
+  formatearCampoMonto(input);
+});
+
+window.leerMonto = leerMonto;
+window.textoMonto = textoMonto;
+window.bindMontos = bindMontos;
 
 async function login() {
   const u = document.getElementById("u");

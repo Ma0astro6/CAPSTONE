@@ -5,7 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Remodelaciones</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css?v=60" />
+  <link rel="stylesheet" href="../css/estilos.css?v=62" />
+  <script>
+    (function () {
+      try {
+        var c = sessionStorage.getItem("CUADRO_ABRE");
+        if (!c) return;
+        sessionStorage.removeItem("CUADRO_ABRE");
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        document.documentElement.classList.add("entra-cuadro", c);
+        var quitar = function () {
+          document.documentElement.classList.remove("entra-cuadro", "t-man", "t-mej", "t-rem");
+        };
+        document.documentElement.addEventListener("animationend", quitar);
+        setTimeout(quitar, 900);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div id="shell">
@@ -42,8 +58,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/config.js"></script>
   <script src="../js/supabase-client.js"></script>
-  <script src="../js/app.js?v=53"></script>
-  <script src="../js/remodelaciones.js?v=12"></script>
+  <script src="../js/app.js?v=56"></script>
+  <script src="../js/remodelaciones.js?v=13"></script>
   <script>
     mount([{label:"Inicio", href:"inicio.html"},{label:"Remodelaciones", href:"remodelaciones.html"}], { agenda: false });
     RE.montarHub();

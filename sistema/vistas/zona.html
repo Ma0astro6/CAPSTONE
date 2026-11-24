@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zona</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css?v=60" />
+  <link rel="stylesheet" href="../css/estilos.css?v=62" />
 </head>
 <body>
   <div id="shell">
@@ -30,7 +30,7 @@
           </div>
           <div><label for="obra-inicio">Inicio</label><input id="obra-inicio" type="date" /></div>
           <div><label for="obra-fin">Fin planificado</label><input id="obra-fin" type="date" /></div>
-          <div><label for="obra-presupuesto">Presupuesto (opcional)</label><input id="obra-presupuesto" type="number" min="0" step="1" placeholder="150000" /></div>
+          <div><label for="obra-presupuesto">Presupuesto (opcional)</label><input id="obra-presupuesto" data-monto type="text" inputmode="numeric" placeholder="150.000" /></div>
           <div class="full"><label for="obra-notas">Descripción</label><textarea id="obra-notas" rows="3" placeholder="Qué se va a hacer: pintar, cambiar piso, reparar el baño…"></textarea></div>
         </div>
         <button class="btn" type="button" id="btn-abrir" style="margin-top:12px">Abrir obra</button>
@@ -76,7 +76,7 @@
             </div>
             <div><label for="compra-nuevo">O uno nuevo</label><input id="compra-nuevo" type="text" placeholder="Si no está en la lista" /></div>
             <div><label for="compra-cant">Cantidad</label><input id="compra-cant" type="number" min="0.01" step="0.01" value="1" /></div>
-            <div><label for="compra-neto">Neto unitario</label><input id="compra-neto" type="number" min="0" step="1" placeholder="32990" /></div>
+            <div><label for="compra-neto">Neto unitario</label><input id="compra-neto" data-monto type="text" inputmode="numeric" placeholder="32.990" /></div>
             <div>
               <label for="compra-estado">Estado</label>
               <select id="compra-estado">
@@ -126,8 +126,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/config.js"></script>
   <script src="../js/supabase-client.js"></script>
-  <script src="../js/app.js?v=53"></script>
-  <script src="../js/remodelaciones.js?v=12"></script>
+  <script src="../js/app.js?v=56"></script>
+  <script src="../js/remodelaciones.js?v=13"></script>
   <script>
     const codigo = qs("z") || "";
     const anio = qs("anio") || "";

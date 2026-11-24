@@ -873,6 +873,78 @@ a.tile.tile-bodega p { margin: 0; max-width: none; font-size: 14px; }
 .t-man { background: linear-gradient(160deg, #3a86a3, #1c536b); }
 .t-mej { background: linear-gradient(160deg, #4a9260, #27633a); }
 .t-rem { background: linear-gradient(160deg, #d48948, #9a5524); }
+.tile-abre {
+  position: fixed;
+  z-index: 400;
+  margin: 0;
+  box-sizing: border-box;
+  color: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+  pointer-events: none;
+  box-shadow: 0 24px 50px rgba(20, 48, 40, 0.28);
+}
+.tile-abre h3 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 22px;
+  line-height: 1.05;
+  margin: 0;
+  transition: font-size 0.52s cubic-bezier(.22, .82, .2, 1);
+}
+.tile-abre p {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.92;
+  transition: font-size 0.52s cubic-bezier(.22, .82, .2, 1);
+}
+.tile-abre .code {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 54px;
+  font-weight: 700;
+  line-height: 0.8;
+  opacity: 0.16;
+  position: absolute;
+  right: 10px;
+  bottom: -6px;
+  transition: font-size 0.52s cubic-bezier(.22, .82, .2, 1), opacity 0.52s ease;
+}
+.tile-abre.crece h3 { font-size: clamp(36px, 5vw, 64px); }
+.tile-abre.crece p { font-size: 18px; }
+.tile-abre.crece .code { font-size: 22vw; opacity: 0.1; right: 4vw; bottom: 2vh; }
+html.entra-cuadro::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+  animation: cuadro-cierra 0.62s cubic-bezier(.22, .82, .2, 1) forwards;
+}
+html.entra-cuadro.t-man::before { background: linear-gradient(160deg, #3a86a3, #1c536b); }
+html.entra-cuadro.t-mej::before { background: linear-gradient(160deg, #4a9260, #27633a); }
+html.entra-cuadro.t-rem::before { background: linear-gradient(160deg, #d48948, #9a5524); }
+html.entra-cuadro .main {
+  animation: cuadro-pagina 0.62s cubic-bezier(.22, .82, .2, 1);
+}
+@keyframes cuadro-cierra {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-105%); }
+}
+@keyframes cuadro-pagina {
+  from { opacity: 0.35; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.entra-cuadro::before,
+  html.entra-cuadro .main { animation: none; }
+  html.entra-cuadro::before { display: none; }
+}
 .t-rea { background: linear-gradient(160deg, #d46a4a, #a83830); }
 .t-jar { background: linear-gradient(160deg, #5a9a4a, #2f5f2c); }
 .t-obr { background: linear-gradient(160deg, #6a7d8a, #3d4e58); }

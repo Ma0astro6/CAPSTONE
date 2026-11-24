@@ -5,7 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mejoras</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/estilos.css?v=60" />
+  <link rel="stylesheet" href="../css/estilos.css?v=62" />
+  <script>
+    (function () {
+      try {
+        var c = sessionStorage.getItem("CUADRO_ABRE");
+        if (!c) return;
+        sessionStorage.removeItem("CUADRO_ABRE");
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        document.documentElement.classList.add("entra-cuadro", c);
+        var quitar = function () {
+          document.documentElement.classList.remove("entra-cuadro", "t-man", "t-mej", "t-rem");
+        };
+        document.documentElement.addEventListener("animationend", quitar);
+        setTimeout(quitar, 900);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div id="shell">
@@ -67,7 +83,7 @@
             <option value="Remodelación / compra">Remodelación / compra</option>
           </select>
           <label for="i-monto">Valor aproximado (CLP)</label>
-          <input id="i-monto" type="number" min="0" step="1000" placeholder="Opcional, ej. 180000" />
+          <input id="i-monto" data-monto type="text" inputmode="numeric" placeholder="Opcional, ej. 180.000" />
           <label for="i-nota">Nota (opcional)</label>
           <textarea id="i-nota" rows="2" placeholder="Por qué importa o qué falta cotizar"></textarea>
           <button class="btn btn-full" type="button" id="i-ok">Agregar idea</button>
@@ -147,7 +163,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/config.js"></script>
   <script src="../js/supabase-client.js"></script>
-  <script src="../js/app.js?v=53"></script>
+  <script src="../js/app.js?v=56"></script>
   <script>
     mount([{label:"Inicio", href:"inicio.html"},{label:"Mejoras", href:"mejoras.html"}], { agenda: false });
 
@@ -230,7 +246,7 @@
       const pasa_a = document.getElementById("i-pasa").value;
       const notas = document.getElementById("i-nota").value.trim() || null;
       const bruto = document.getElementById("i-monto").value.trim();
-      const monto_aprox = bruto === "" ? null : Math.round(Number(bruto));
+      const monto_aprox = bruto === "" ? null : (window.leerMonto ? leerMonto(bruto) : Math.round(Number(bruto)));
       if (bruto !== "" && !(monto_aprox >= 0)) {
         msg.textContent = "El valor aproximado tiene que ser un número.";
         if (window.cuadro) cuadro("Falta un dato", msg.textContent);

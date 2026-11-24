@@ -291,7 +291,7 @@ function montarCatalogo(cfg) {
           <td>${esc(v.quien) || "—"}</td>
           <td>${esc(v.empresa) || "—"}</td>
           <td>${esc(v.detalle) || "—"}</td>
-          <td>${esc(v.costo) || "—"}</td>
+          <td>${v.costo ? esc(window.textoMonto ? textoMonto(v.costo) : v.costo) : "—"}</td>
           <td>${esc(v.proxima) || "—"}</td>
         </tr>`).join("")}</tbody></table>`
         : "<p class=\"muted-mini\">Aún no hay visitas registradas.</p>"}
@@ -306,10 +306,12 @@ function montarCatalogo(cfg) {
       ${editKeys.map((k) => {
         const col = cols.find((c) => c.key === k);
         const lab = col ? col.label : k;
-        return `<label>${esc(lab)}</label><input data-ek="${k}" type="text" value="${esc(row[k] || "")}" />`;
+        const monto = /costo|monto|presupuesto|precio|neto/i.test(k);
+        return `<label>${esc(lab)}</label><input data-ek="${k}"${monto ? " data-monto" : ""} type="text"${monto ? ' inputmode="numeric"' : ""} value="${esc(row[k] || "")}" />`;
       }).join("")}
       <button class="btn btn-full" type="button" id="edit-ok" style="margin-top:14px">Guardar cambios de la ficha</button>
       <p class="muted-mini">Esto no registra una visita. Solo corrige los datos de la fila (como en el Excel).</p>`;
+    if (window.bindMontos) bindMontos(modalBody);
     modal.hidden = false;
     modalBody.querySelector("#edit-ok").onclick = async () => {
       modalBody.querySelectorAll("[data-ek]").forEach((inp) => {
@@ -382,7 +384,7 @@ function montarCatalogo(cfg) {
         </div>
         <div>
           <label for="v-costo">Costo (CLP)</label>
-          <input id="v-costo" type="text" inputmode="numeric" placeholder="Opcional" />
+          <input id="v-costo" data-monto type="text" inputmode="numeric" placeholder="Opcional, ej. 18.000" />
         </div>
         <div>
           <label for="v-prox">Próxima visita</label>
@@ -409,6 +411,7 @@ function montarCatalogo(cfg) {
         </div>` : ""}
       </div>
       <button class="btn btn-full btn-green" type="button" id="v-ok" style="margin-top:14px">Guardar visita</button>`;
+    if (window.bindMontos) bindMontos(modalBody);
     modal.hidden = false;
 
     const itemSel = modalBody.querySelector("#v-item");

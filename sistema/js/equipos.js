@@ -182,13 +182,14 @@
       '<div><label for="quien">Quién lo hizo *</label><input id="quien" type="text" placeholder="Nombre (ej. Palito-Jorge)" /></div>' +
       '<div><label for="empresa">Empresa / proveedor</label><input id="empresa" type="text" placeholder="Cosmoplas, interno, camión…" /></div>' +
       '<div class="full"><label for="detalle">Trabajo realizado *</label><textarea id="detalle" rows="3" placeholder="Qué se hizo, piezas, observaciones"></textarea></div>' +
-      '<div><label for="costo">Costo (CLP)</label><input id="costo" type="text" inputmode="numeric" placeholder="Opcional" /></div>' +
+      '<div><label for="costo">Costo (CLP)</label><input id="costo" data-monto type="text" inputmode="numeric" placeholder="Opcional, ej. 18.000" /></div>' +
       '<div><label for="proxima">Próxima visita</label><input id="proxima" type="date" /></div>' +
       '<div class="full"><p class="muted-mini">Si usaste pilas u otro insumo, anótalo y se descuenta de la bodega. Si lo dejas vacío, el stock no cambia y hay que corregirlo en Bodega.</p></div>' +
       '<div><label for="insumo">Insumo usado</label><select id="insumo"><option value="">No descontar</option></select></div>' +
       '<div><label for="ins-cant">Cantidad</label><input id="ins-cant" type="number" min="0" step="1" placeholder="Opcional" /></div>' +
       '</div><p class="muted-mini" id="msg"></p>' +
       '<button class="btn btn-full btn-green" type="submit">Guardar mantención</button></form></section>';
+    if (window.bindMontos) bindMontos(main);
 
     const $ = (id) => document.getElementById(id);
     $("fecha").value = hoyISO();
