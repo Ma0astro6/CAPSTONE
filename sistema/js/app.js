@@ -239,15 +239,19 @@ async function pintarBotonesInicio() {
 }
 
 const CUADROS_ABRE = {
-  "mantencion.html": "t-man",
-  "mejoras.html": "t-mej",
-  "remodelaciones.html": "t-rem"
+  mantencion: "t-man",
+  mejoras: "t-mej",
+  remodelaciones: "t-rem"
 };
+
+function nombrePagina(href) {
+  return String(href || "").split("?")[0].split("#")[0].split("/").pop().replace(/\.html$/i, "");
+}
 
 function cuadroDestino(a) {
   if (!a || !a.classList || !a.classList.contains("tile")) return "";
-  const href = (a.getAttribute("href") || "").split("?")[0].split("#")[0].split("/").pop();
-  return CUADROS_ABRE[href] || "";
+  const nombre = nombrePagina(a.getAttribute("href")) || nombrePagina(a.pathname);
+  return CUADROS_ABRE[nombre] || "";
 }
 
 let cuadroYendo = false;
